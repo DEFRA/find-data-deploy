@@ -1,0 +1,6 @@
+---
+# postgres role
+
+- hosts: postgres
+  roles:
+    - { role: postgres }

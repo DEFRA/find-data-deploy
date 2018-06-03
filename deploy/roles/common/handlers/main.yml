@@ -1,0 +1,5 @@
+---
+# Handlers for common
+
+#- name: example restart
+#  action: service name=service state=restarted

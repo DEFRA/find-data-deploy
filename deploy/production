@@ -1,0 +1,14 @@
+# production inventory
+
+[common]
+# host
+
+[postgres]
+# host
+
+[solr]
+# host
+
+[ckan]
+# host
+

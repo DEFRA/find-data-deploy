@@ -1,0 +1,7 @@
+---
+# master playbook
+
+- import_playbook: common.yml
+- import_playbook: postgres.yml
+- import_playbook: solr.yml
+- import_playbook: ckan.yml

@@ -1,0 +1,6 @@
+---
+# solr role
+
+- hosts: solr
+  roles:
+    - { role: solr }

@@ -1,0 +1,39 @@
+---
+
+  
+- name: install packages for CKAN
+  become: true
+  apt:
+      pkg: "{{ item }}"
+      state: present
+      update_cache: true
+  with_items:
+    - build-essential
+    - nginx    
+    - libapache2-mod-wsgi
+    - libpq5
+    - redis-server
+    - screen
+    - tree
+    - vim
+    - git-core
+  
+- name: Creates deploy directory
+  file: path=deploy state=directory
+
+- name: Check if ckan is installed
+  command: dpkg-query -W python-ckan_2.8-xenial_amd64
+  register: ckan_deb_check
+  failed_when: ckan_deb_check.rc > 1
+  changed_when: ckan_deb_check.rc == 1
+
+- name: Download ckan.deb
+  get_url: 
+    url="http://packaging.ckan.org/python-ckan_2.8-xenial_amd64.deb"
+    dest="deploy/python-ckan_2.8-xenial_amd64.deb"
+  when: ckan_deb_check.rc == 1  
+
+- name: Install ckan.deb
+  apt: deb="deploy/python-ckan_2.8-xenial_amd64.deb"
+  become: true
+  when: ckan_deb_check.rc == 1  

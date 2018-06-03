@@ -1,0 +1,6 @@
+---
+# ckan role
+
+- hosts: ckan
+  roles:
+    - { role: ckan }
