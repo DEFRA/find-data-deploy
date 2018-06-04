@@ -1,5 +1,6 @@
 ---
 # Handlers for solr
 
-#- name: example restart
-#  action: service name=service state=restarted
+- name: restart solr
+  become: true
+  action: service name=jetty8 state=restarted

@@ -37,3 +37,10 @@
     name: postgis
     db: ckan_default
     
+- name: Copy the auth file 
+  become: true
+  become_user: postgres
+  template:
+      src: files/pg_hba.conf
+      dest: /etc/postgresql/9.5/main/pg_hba.conf
+  notify: restart postgres

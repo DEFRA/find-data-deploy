@@ -1,9 +1,30 @@
 ---
 # Tasks for solr
 
-#- name: example
-#  action: example
-#  notify:
-#    - restart service
-#  tags:
-#    - example
+- name: install packages for solr
+  become: true
+  apt:
+      pkg: "{{ item }}"
+      state: present
+      update_cache: true
+  with_items:
+    - solr-jetty
+
+
+- name: Add jetty default
+  become: true
+  template:
+      src: files/jetty8
+      dest: /etc/default/jetty8
+
+- name: Backup old schema file
+  become: true
+  copy: 
+    remote_src: true
+    src: /etc/solr/conf/schema.xml 
+    dest: /etc/solr/conf/schema.xml.bak
+  ignore_errors: true
+
+- name: Remove old schema file
+  become: true
+  file: path=/etc/solr/conf/schema.xml state=absent

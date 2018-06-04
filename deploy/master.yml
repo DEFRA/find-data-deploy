@@ -1,6 +1,13 @@
 ---
 # master playbook
 
+- hosts: all
+  gather_facts: False
+  tasks:
+    - name: install python 2
+      become: true 
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+
 - import_playbook: common.yml
 - import_playbook: postgres.yml
 - import_playbook: solr.yml

@@ -1,5 +1,6 @@
 ---
 # Handlers for postgres
 
-#- name: example restart
-#  action: service name=service state=restarted
+- name: restart postgres
+  become: true
+  action: service name=postgresql state=restarted

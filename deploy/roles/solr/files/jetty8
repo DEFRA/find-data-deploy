@@ -1,0 +1,5 @@
+NO_START=0
+VERBOSE=yes
+JETTY_HOST=127.0.0.1
+JETTY_PORT=8983
+JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/

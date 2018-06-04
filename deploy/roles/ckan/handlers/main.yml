@@ -1,5 +1,14 @@
 ---
 # Handlers for ckan
 
-#- name: example restart
-#  action: service name=service state=restarted
+- name: restart apache
+  become: true
+  action: service name=apache2 state=restarted
+
+- name: restart solr
+  become: true
+  action: service name=jetty8 state=restarted
+
+- name: restart nginx 
+  become: true
+  action: service name=nginx state=restarted  
