@@ -1,6 +1,6 @@
 ---
 
-  
+
 - name: install packages for CKAN
   become: true
   apt:
@@ -9,7 +9,7 @@
       update_cache: true
   with_items:
     - build-essential
-    - nginx    
+    - nginx
     - libapache2-mod-wsgi
     - libpq5
     - redis-server
@@ -17,7 +17,23 @@
     - tree
     - vim
     - git-core
+    - supervisor
 
+- name: Ensure redis is running
+  become: true
+  service:
+    name: redis-server
+    state: restarted
+
+- name: Make sure harvest logging folder exists
+  become: true
+  file: path=/var/log/ckan/std/ state=directory
+
+- name: Ensure supervisor is running
+  become: true
+  service:
+    name: supervisor
+    state: restarted
 
 - name: Creates deploy directory
   file: path=deploy state=directory
@@ -29,33 +45,93 @@
   changed_when: ckan_deb_check.rc == 1
 
 - name: Download ckan.deb
-  get_url: 
+  get_url:
     url="http://packaging.ckan.org/python-ckan_2.8-xenial_amd64.deb"
     dest="deploy/python-ckan_2.8-xenial_amd64.deb"
-  when: ckan_deb_check.rc == 1  
+  when: ckan_deb_check.rc == 1
 
 - name: Install ckan.deb
   apt: deb="deploy/python-ckan_2.8-xenial_amd64.deb"
   become: true
-  when: ckan_deb_check.rc == 1  
+  when: ckan_deb_check.rc == 1
 
-- name: Enable modwsgi 
-  become: true 
+- name: Enable modwsgi
+  become: true
   command: a2enmod wsgi
   notify: restart apache
 
-- name: Copy the .ini file 
+- name: Copy the .ini file
   become: true
   template:
       src: files/production.ini
       dest: /etc/ckan/default/production.ini
 
-- name: Install the ckanext-defra extension 
+- name: Install the ckanext-defra extension
   become: true
   pip:
     editable: true
     virtualenv: /usr/lib/ckan/default/
     name: file:///vagrant/src/ckanext-defra
+
+# Harvesting ##########################################################
+
+- name: Install the ckanext-harvesting extension
+  become: true
+  pip:
+    editable: true
+    virtualenv: /usr/lib/ckan/default/
+    name: file:///vagrant/src/ckanext-harvest
+
+- name: Install the requirements
+  become: true
+  command: "/usr/lib/ckan/default/bin/pip install -r /vagrant/src/ckanext-harvest/pip-requirements.txt"
+  args:
+    creates: deploy/harvest_req_init
+
+- name: Mark deps installed
+  become: true
+  copy:
+    content: ""
+    dest: /home/vagrant/deploy/harvest_req_init
+    force: no
+    group: sys
+    owner: root
+    mode: 0555
+
+- name: Copy the supervisor config
+  become: true
+  template:
+      src: files/ckan_harvesting.conf
+      dest: /etc/supervisor/conf.d/ckan_harvesting.conf
+
+- name: "Start supervisor tasks"
+  become: true
+  command: service supervisor reload
+  args:
+    warn: no
+
+
+- name: "Start supervisor tasks"
+  become: true
+  command: supervisorctl restart all
+
+- name: "Setup harvest cronjob"
+  cron:
+    name: "harvester run"
+    minute: "*/10"
+    job: "/usr/lib/ckan/default/bin/paster --plugin=ckanext-harvest harvester run --config=/etc/ckan/default/production.ini"
+
+########################################################################
+# Spatial  #############################################################
+
+- name: Install the ckanext-spatial extension
+  become: true
+  pip:
+    editable: true
+    virtualenv: /usr/lib/ckan/default/
+    name: file:///vagrant/src/ckanext-spatial
+
+########################################################################
 
 - name: symlink ckan schema
   become: true
@@ -67,12 +143,38 @@
   notify: restart solr
 
 - name: Initialise the database
-  become: true 
-  command: "ckan db init && touch deploy/db_init" 
+  become: true
+  command: "ckan db init"
   args:
     creates: deploy/db_init
 
-- name: restart the things part 1 
+- name: Initialise the harvesting database
+  become: true
+  command: "ckan --plugin=ckanext-harvest harvester initdb -c /etc/ckan/default/production.ini"
+  args:
+    creates: deploy/harvest_db_init
+
+- name: ensure file exists
+  become: true
+  copy:
+    content: ""
+    dest: /home/vagrant/deploy/db_init
+    force: no
+    group: sys
+    owner: root
+    mode: 0555
+
+- name: ensure file exists
+  become: true
+  copy:
+    content: ""
+    dest: /home/vagrant/deploy/harvest_db_init
+    force: no
+    group: sys
+    owner: root
+    mode: 0555
+
+- name: restart the things part 1
   become: true
   service:
     name: apache2
@@ -81,6 +183,6 @@
 - name: restart the things part 2
   become: true
   service:
-    name: nginx 
+    name: nginx
     state: restarted
 
