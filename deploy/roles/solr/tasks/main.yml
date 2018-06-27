@@ -19,12 +19,15 @@
 
 - name: Backup old schema file
   become: true
-  copy: 
+  copy:
     remote_src: true
-    src: /etc/solr/conf/schema.xml 
+    src: /etc/solr/conf/schema.xml
     dest: /etc/solr/conf/schema.xml.bak
   ignore_errors: true
 
-- name: Remove old schema file
+- name: install ckan schema
   become: true
-  file: path=/etc/solr/conf/schema.xml state=absent
+  template:
+      src: files/schema.xml
+      dest: /etc/solr/conf/schema.xml
+  notify: restart solr

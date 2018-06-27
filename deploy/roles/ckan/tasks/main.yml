@@ -18,6 +18,11 @@
     - vim
     - git-core
     - supervisor
+    - python-dev
+    - libxml2-dev
+    - libxslt1-dev
+    - libgeos-c1v5
+
 
 - name: Ensure redis is running
   become: true
@@ -82,7 +87,7 @@
     virtualenv: /usr/lib/ckan/default/
     name: file:///vagrant/src/ckanext-harvest
 
-- name: Install the requirements
+- name: Install the harvesting requirements
   become: true
   command: "/usr/lib/ckan/default/bin/pip install -r /vagrant/src/ckanext-harvest/pip-requirements.txt"
   args:
@@ -104,14 +109,13 @@
       src: files/ckan_harvesting.conf
       dest: /etc/supervisor/conf.d/ckan_harvesting.conf
 
-- name: "Start supervisor tasks"
+- name: "Start supervisor tasks (1/2)"
   become: true
   command: service supervisor reload
   args:
     warn: no
 
-
-- name: "Start supervisor tasks"
+- name: "Start supervisor tasks (2/2)"
   become: true
   command: supervisorctl restart all
 
@@ -131,28 +135,30 @@
     virtualenv: /usr/lib/ckan/default/
     name: file:///vagrant/src/ckanext-spatial
 
-########################################################################
-
-- name: symlink ckan schema
+- name: Install the spatial requirements
   become: true
-  file:
-    src: "/usr/lib/ckan/default/src/ckan/ckan/config/solr/schema.xml"
-    dest: "/etc/solr/conf/schema.xml"
-    state: link
-    force: yes
-  notify: restart solr
+  command: "/usr/lib/ckan/default/bin/pip install -r /vagrant/src/ckanext-spatial/pip-requirements.txt"
+  args:
+    creates: deploy/spatial_req_init
+
+- name: Mark deps installed
+  become: true
+  copy:
+    content: ""
+    dest: /home/vagrant/deploy/spatial_req_init
+    force: no
+    group: sys
+    owner: root
+    mode: 0555
+
+########################################################################
+# Database tasks #######################################################
 
 - name: Initialise the database
   become: true
   command: "ckan db init"
   args:
     creates: deploy/db_init
-
-- name: Initialise the harvesting database
-  become: true
-  command: "ckan --plugin=ckanext-harvest harvester initdb -c /etc/ckan/default/production.ini"
-  args:
-    creates: deploy/harvest_db_init
 
 - name: ensure file exists
   become: true
@@ -164,6 +170,12 @@
     owner: root
     mode: 0555
 
+- name: Initialise the harvesting database
+  become: true
+  command: "ckan --plugin=ckanext-harvest harvester initdb -c /etc/ckan/default/production.ini"
+  args:
+    creates: deploy/harvest_db_init
+
 - name: ensure file exists
   become: true
   copy:
@@ -173,6 +185,48 @@
     group: sys
     owner: root
     mode: 0555
+
+- name: Change postgis permissions (1/2)
+  become: true
+  become_user: postgres
+  command: "psql -d ckan_default -c 'ALTER VIEW geometry_columns OWNER TO ckan_default;'"
+  args:
+    creates: deploy/postgis_init
+
+- name: Change postgis permissions (2/2)
+  become: true
+  become_user: postgres
+  command: "psql -d ckan_default -c 'ALTER TABLE spatial_ref_sys OWNER TO ckan_default;'"
+  args:
+    creates: deploy/postgis_init
+
+- name: ensure file exists
+  become: true
+  copy:
+    content: ""
+    dest: /home/vagrant/deploy/postgis_init
+    force: no
+    group: sys
+    owner: root
+    mode: 0555
+
+- name: Initialise the spatial database
+  become: true
+  command: "ckan --plugin=ckanext-spatial spatial initdb 4326 -c /etc/ckan/default/production.ini"
+  args:
+    creates: deploy/spatial_db_init
+
+- name: ensure file exists
+  become: true
+  copy:
+    content: ""
+    dest: /home/vagrant/deploy/spatial_db_init
+    force: no
+    group: sys
+    owner: root
+    mode: 0555
+
+########################################################################
 
 - name: restart the things part 1
   become: true
