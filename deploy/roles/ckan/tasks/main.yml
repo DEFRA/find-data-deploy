@@ -126,7 +126,7 @@
     job: "/usr/lib/ckan/default/bin/paster --plugin=ckanext-harvest harvester run --config=/etc/ckan/default/production.ini"
 
 ########################################################################
-# Spatial  #############################################################
+# Spatial inc. geoview  ################################################
 
 - name: Install the ckanext-spatial extension
   become: true
@@ -140,6 +140,13 @@
   command: "/usr/lib/ckan/default/bin/pip install -r /vagrant/src/ckanext-spatial/pip-requirements.txt"
   args:
     creates: deploy/spatial_req_init
+
+- name: Install the geoview extension
+  become: true
+  pip:
+    editable: false
+    virtualenv: /usr/lib/ckan/default/
+    name: ckanext-geoview
 
 - name: Mark deps installed
   become: true
