@@ -78,6 +78,7 @@
     virtualenv: /usr/lib/ckan/default/
     name: file:///vagrant/src/ckanext-defra
 
+#######################################################################
 # Harvesting ##########################################################
 
 - name: Install the ckanext-harvesting extension
@@ -157,6 +158,45 @@
     group: sys
     owner: root
     mode: 0555
+
+#######################################################################
+# DCAT ################################################################
+
+
+- name: Install the ckanext-dcat extension
+  become: true
+  pip:
+    editable: true
+    virtualenv: /usr/lib/ckan/default/
+    name: file:///vagrant/src/ckanext-dcat
+
+- name: Install the dcat requirements
+  become: true
+  command: "/usr/lib/ckan/default/bin/pip install -r /vagrant/src/ckanext-dcat/requirements.txt"
+  args:
+    creates: deploy/dcat_req_init
+
+- name: Mark deps installed
+  become: true
+  copy:
+    content: ""
+    dest: /home/vagrant/deploy/dcat_req_init
+    force: no
+    group: sys
+    owner: root
+    mode: 0555
+
+#######################################################################
+# DCAT ################################################################
+
+
+- name: Install the ckanext-dcat extension
+  become: true
+  pip:
+    editable: true
+    virtualenv: /usr/lib/ckan/default/
+    name: file:///vagrant/src/ckanext-officedocs
+
 
 ########################################################################
 # Database tasks #######################################################
