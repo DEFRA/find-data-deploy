@@ -201,6 +201,13 @@
 ########################################################################
 # Database tasks #######################################################
 
+- name: "Setup tracking cronjob"
+  cron:
+    name: "tracking run"
+    minute: "0"
+    hour: "*"
+    job: "/usr/lib/ckan/default/bin/paster --plugin=ckan tracking update -c /etc/ckan/default/production.ini && /usr/lib/ckan/default/bin/paster --plugin=ckan search-index rebuild -r -c /etc/ckan/default/production.ini"
+
 - name: Initialise the database
   become: true
   command: "ckan db init"
