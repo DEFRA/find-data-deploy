@@ -10,12 +10,17 @@
   with_items:
     - solr-jetty
 
-
 - name: Add jetty default
   become: true
   template:
       src: files/jetty8
       dest: /etc/default/jetty8
+
+- name: Add jetty default
+  become: true
+  template:
+      src: files/solrconfig.xml
+      dest: /etc/solr/conf/solrconfig.xml
 
 - name: Backup old schema file
   become: true

@@ -1,14 +1,12 @@
-# production inventory
-
 [common]
-# host
+127.0.0.1 ansible_connection=local
 
 [postgres]
-# host
+127.0.0.1 ansible_connection=local
 
 [solr]
-# host
+127.0.0.1 ansible_connection=local
 
 [ckan]
-# host
+127.0.0.1 ansible_connection=local
 
