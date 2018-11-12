@@ -127,6 +127,24 @@
     job: "/usr/lib/ckan/default/bin/paster --plugin=ckanext-harvest harvester run --config=/etc/ckan/default/production.ini"
 
 ########################################################################
+# Report extension      ################################################
+
+- name: Install the ckanext-report extension
+  become: true
+  pip:
+    editable: true
+    virtualenv: /usr/lib/ckan/default/
+    name: file:///vagrant/src/ckanext-report
+
+
+- name: Initialise the reports database
+  become: true
+  command: "ckan --plugin=ckanext-report report initdb  -c /etc/ckan/default/production.ini"
+  args:
+    creates: deploy/report_db_init
+
+
+########################################################################
 # Spatial inc. geoview  ################################################
 
 - name: Install the ckanext-spatial extension
