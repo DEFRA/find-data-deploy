@@ -3,3 +3,7 @@
 ubuntu-xenial-16.04-cloudimg-console.log
 .vagrant/
 src/
+
+deploy/ckan.retry
+deploy/deploy/
+connect.sh 
