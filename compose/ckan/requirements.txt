@@ -1,0 +1,13 @@
+-e git://github.com/jqnatividad/ckanext-officedocs.git#egg=ckanext-officedocs
+-e git://github.com/servercode/ckanext-report.git#egg=ckanext-report
+-e git://github.com/ckan/ckanext-harvest.git#egg=ckanext-harvest
+-e git://github.com/ckan/ckanext-spatial.git#egg=ckanext-spatial
+-e git://github.com/ckan/ckanext-dcat.git#egg=ckanext-dcat
+-e git://github.com/pduchesne/ckanext-geoview.git#egg=ckanext-geoview
+-e git://github.com/NaturalHistoryMuseum/ckanext-dev.git#egg=ckanext-dev
+pyOpenSSL==18.0.0
+geoalchemy2==0.5.0
+lxml==4.2.5
+shapely==1.6.4
+ckanapi==4.1
+OWSLib==0.17.0
