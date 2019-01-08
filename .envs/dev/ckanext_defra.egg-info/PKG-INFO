@@ -1,0 +1,18 @@
+Metadata-Version: 1.1
+Name: ckanext-defra
+Version: 0.0.1
+Summary: defra prototype/alpha extension
+Home-page: https://github.com/
+Author: UNKNOWN
+Author-email: UNKNOWN
+License: AGPL
+Description: 
+        # ckanext-defra
+        
+        
+Keywords: CKAN defra
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 2.7
