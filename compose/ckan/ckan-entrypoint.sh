@@ -83,7 +83,6 @@ psql -h db -d ckan -U ckan -c 'ALTER TABLE spatial_ref_sys OWNER TO ckan;'
 # Initialise the spatial database
 ckan-paster --plugin=ckanext-spatial spatial initdb 4326 -c /etc/ckan/production.ini
 
-
 if [ ! -f /tmp/.initialized ]; then
 
     # Setup tracking cronjob
