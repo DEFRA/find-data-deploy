@@ -10,7 +10,7 @@ services:
     container_name: mdf-ckan
     build:
       context: .
-      dockerfile: compose/ckan/Dockerfile-dev 
+      dockerfile: compose/ckan/Dockerfile-dev
       args:
         - CKAN_SITE_URL=${CKAN_SITE_URL}
     links:
@@ -21,8 +21,8 @@ services:
     ports:
       - "0.0.0.0:${CKAN_PORT}:5000"
     environment:
-      - CKAN_SQLALCHEMY_URL=postgresql://ckan:${POSTGRES_PASSWORD}@db/ckan
-      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan:${POSTGRES_PASSWORD}@db/datastore
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/ckan_default
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/datastore
       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
@@ -33,10 +33,9 @@ services:
       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
       - CKAN_INI=/etc/ckan/production.ini
     volumes:
-      - ./compose/ckan/config/development.ini:/etc/ckan/production.ini
-      - ./compose/ckan/config/init.ini:/etc/ckan/init.ini
-      - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
       - ./compose/ckan/ckan-entrypoint.sh:/ckan-entrypoint.sh
+      - ./compose/ckan/config/development.ini:/etc/ckan/production.ini
+      - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
     command:
       /usr/lib/ckan/venv/bin/paster serve /etc/ckan/production.ini --reload
 
@@ -89,8 +88,8 @@ services:
       - ./compose/ckan/config/development.ini:/etc/ckan/production.ini
       - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
     environment:
-      - CKAN_SQLALCHEMY_URL=postgresql://ckan:${POSTGRES_PASSWORD}@db/ckan
-      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan:${POSTGRES_PASSWORD}@db/datastore
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/ckan_default
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/datastore
       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1

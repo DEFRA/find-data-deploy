@@ -20,8 +20,25 @@
     * Copy the pre-prepared egg directory into the defra plugin to allow for an editable install `cp -r .envs/dev/ckanext_defra.egg-info ckan-extensions/ckanext-defra/`
     * Bring the containers up `docker-compose -f development.yml up`
     * Visit http://localhost:5000
-
-4. Troubleshooting
     * If ckan doesn't load after you first bring the containers up:
         * This is most likely caused by a race condition between the ckan container and the db.
         * Restarting the ckan container should sort it out `docker-compose -f development.yml up -d ckan`
+
+4. Import Data
+    
+    TODO: This will change significantly once alpha is live
+    
+    * Stop the ckan and supervisor containers to stop them locking tables in the db
+        * `docker-compose -f development.yml stop ckan`
+        * `docker-compose -f development.yml stop supervisor`
+    * SSH to the prototype `ssh vagrant@dd-find-proto.ukwest.cloudapp.azure.com`
+    * Dump the db ``sudo -u postgres pg_dump ckan_default > /tmp/ckan-backup-`date +%F`.sql``
+    * Tar the sql file ``tar -czvf "/tmp/ckan-backup-`date +%F`.tgz"  -C /tmp/ "ckan-backup-`date +%F`.sql"``
+    * Exit back to your local machine `exit`
+    * Copy the tar file locally `scp vagrant@dd-find-proto.ukwest.cloudapp.azure.com:/tmp/ckan-backup-`date +%F`.tgz /tmp/`
+    * Untar the sql ``tar -xzf /tmp/ckan-backup-`date +%F`.tgz -C /tmp/``
+    * Ensure roles exists in the db (pass: ckan) `psql -h localhost -d postgres -p 5433 -U ckan_default -c 'CREATE USER postgres SUPERUSER;'`
+    * Run the sql (pass: ckan) ``psql -h localhost -p 5433 -U ckan_default < /tmp/ckan-backup-`date +%F`.sql`` 
+    * Restart all containers `docker-compose -f development.yml up -d`
+    * You will also probably need to rebuild the solr search index `docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan search-index rebuild -o --config=/etc/ckan/production.ini`
+    

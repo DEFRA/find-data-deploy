@@ -65,25 +65,25 @@ fi
 
 set_environment
 
-# Initialise the database
-ckan-paster --plugin=ckan db init -c "/etc/ckan/production.ini"
-
-# Initialise the reports
-ckan-paster --plugin=ckanext-report report initdb
-
-# Initialise the harvesting database
-ckan-paster --plugin=ckanext-harvest harvester initdb -c /etc/ckan/production.ini
-
-# Change postgis permissions (1/2)
-psql -h db -d ckan -U ckan -c 'ALTER VIEW geometry_columns OWNER TO ckan;'
-
-# Change postgis permissions (2/2)
-psql -h db -d ckan -U ckan -c 'ALTER TABLE spatial_ref_sys OWNER TO ckan;'
-
-# Initialise the spatial database
-ckan-paster --plugin=ckanext-spatial spatial initdb 4326 -c /etc/ckan/production.ini
-
 if [ ! -f /tmp/.initialized ]; then
+
+    # Initialise the database
+    ckan-paster --plugin=ckan db init -c "/etc/ckan/production.ini"
+
+    # Initialise the reports
+    ckan-paster --plugin=ckanext-report report initdb
+
+    # Initialise the harvesting database
+    ckan-paster --plugin=ckanext-harvest harvester initdb -c /etc/ckan/production.ini
+
+    # Change postgis permissions (1/2)
+    psql -h db -d ckan_default -U ckan_default -c 'ALTER VIEW geometry_columns OWNER TO ckan_default;'
+
+    # Change postgis permissions (2/2)
+    psql -h db -d ckan_default -U ckan_default -c 'ALTER TABLE spatial_ref_sys OWNER TO ckan_default;'
+
+    # Initialise the spatial database
+    ckan-paster --plugin=ckanext-spatial spatial initdb 4326 -c /etc/ckan/production.ini
 
     # Setup tracking cronjob
     ckan-paster --plugin=ckan tracking update -c /etc/ckan/production.ini && ckan-paster --plugin=ckan search-index rebuild -r -c /etc/ckan/production.ini
