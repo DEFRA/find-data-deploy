@@ -18,6 +18,8 @@
     * cd to the root project dir `cd ../../../`
     * Get a copy of the dev environment variables `cp .envs/dev/.env .`
     * Copy the pre-prepared egg directory into the defra plugin to allow for an editable install `cp -r .envs/dev/ckanext_defra.egg-info ckan-extensions/ckanext-defra/`
+    * Alias ckan to localhost (required for working with datapusher)
+        * Add `127.0.1.1      ckan` to `/etc/hosts` 
     * Bring the containers up `docker-compose -f development.yml up`
     * Visit http://localhost:5000
     * If ckan doesn't load after you first bring the containers up:
@@ -41,4 +43,10 @@
     * Run the sql (pass: ckan) ``psql -h localhost -p 5433 -U ckan_default < /tmp/ckan-backup-`date +%F`.sql`` 
     * Restart all containers `docker-compose -f development.yml up -d`
     * You will also probably need to rebuild the solr search index `docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan search-index rebuild -o --config=/etc/ckan/production.ini`
+    
+5. Setup Datastore
+  * Set postgres permissions ``docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan datastore set-permissions -c /etc/ckan/production.ini | psql -h db -U ckan_default --set ON_ERROR_STOP=1``
+  
+6. User
+    * Create a superuser account for yourself ``docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan sysadmin add <YOUR USERNAME> email=<YOUR EMAIL> name=<YOUR USERNAME> -c /etc/ckan/production.ini``
     
