@@ -46,7 +46,7 @@
     
 5. Setup Datastore
   * Set postgres permissions ``docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan datastore set-permissions -c /etc/ckan/production.ini | psql -h db -U ckan_default --set ON_ERROR_STOP=1``
-  
+  * Add existing datasets to the datastore``docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan datapusher submit_all -c /etc/ckan/production.ini``  
 6. User
     * Create a superuser account for yourself ``docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan sysadmin add <YOUR USERNAME> email=<YOUR EMAIL> name=<YOUR USERNAME> -c /etc/ckan/production.ini``
     
