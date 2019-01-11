@@ -19,6 +19,7 @@ services:
       - redis
       - mailhog
       - datapusher
+      - location
     ports:
       - "0.0.0.0:${CKAN_PORT}:5000"
     environment:
@@ -107,15 +108,18 @@ services:
 
   location:
     container_name: mdf-location
-    image: golang:latest
+    build:
+      context: .
+      dockerfile: compose/location/Dockerfile-dev
     volumes:
-      - "./services/golang:/app/src/"
+      - ./services/golang/location-lookup:/go/src/location-lookup
+      - ./compose/location/data/merged_results.csv:/merged_results.csv
+      - ./compose/location/entrypoint.sh:/entrypoint.sh
     ports:
       - "5001:5000"
     environment:
-      - GOPATH=/app
-      - LOCATION_MERGE_FILE=/app/src/location-lookup/data/merged_results.csv
-    command: make --directory /app/src/location-lookup run
+      - LOCATION_MERGE_FILE=/go/src/location-lookup/merged_results.csv
+    command: make --directory /go/src/location-lookup run
 
   mailhog:
     image: mailhog/mailhog:v1.0.0

@@ -1,0 +1,20 @@
+FROM golang:latest AS builder
+
+# Install tools required to build the project
+RUN apt-get install -y git
+RUN go get github.com/golang/dep/cmd/dep
+
+# Gopkg.toml and Gopkg.lock lists project dependencies
+COPY ./services/golang/location-lookup/Gopkg.lock ./services/golang/location-lookup/Gopkg.toml /go/src/location-lookup/
+
+WORKDIR /go/src/location-lookup/
+
+# Install library dependencies
+RUN dep ensure -vendor-only
+
+# This results in a single layer image
+FROM golang:latest
+ENV LOCATION_MERGE_FILE=/merged_results.csv
+# ENTRYPOINT ["/entrypoint.sh"]
+
+CMD ["make", "--directory", "/go/src/location-lookup", "run"]
