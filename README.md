@@ -12,7 +12,7 @@
     * Unzip the downloaded csv to compose/location/data/
     * cd to the data dir `cd compose/location/data/`
     * Unzip the file `unzip opname_csv_gb.zip`
-    * Merge all data into a single file for the go app `cat DATA/* > merged_results.csv`
+    * Merge all data into a single file for the go app `cat DATA/* | grep populatedPlace > merged_results.csv`
     
 3. Get it running
     * cd to the root project dir `cd ../../../`
