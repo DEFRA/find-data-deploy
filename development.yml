@@ -118,7 +118,7 @@ services:
     ports:
       - "5001:5000"
     environment:
-      - LOCATION_MERGE_FILE=/go/src/location-lookup/merged_results.csv
+      - LOCATION_MERGE_FILE=/merged_results.csv
     command: make --directory /go/src/location-lookup run
 
   mailhog:
