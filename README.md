@@ -21,7 +21,7 @@
     * Alias ckan to localhost (required for working with datapusher)
         * Add `127.0.1.1      ckan` to `/etc/hosts` 
     * Bring the containers up `docker-compose -f development.yml up`
-    * Visit http://localhost:5000
+    * Visit http://ckan:5000
     * If ckan doesn't load after you first bring the containers up:
         * This is most likely caused by a race condition between the ckan container and the db.
         * Restarting the ckan container should sort it out `docker-compose -f development.yml up -d ckan`
