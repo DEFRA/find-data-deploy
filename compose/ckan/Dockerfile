@@ -1,6 +1,6 @@
 # See CKAN docs on installation from Docker Compose on usage
-FROM debian:stretch
-MAINTAINER Open Knowledge
+FROM debian:stretch as builder
+MAINTAINER Defra
 
 # Install required system packages
 RUN apt-get -q -y update \
@@ -22,8 +22,15 @@ RUN apt-get -q -y update \
         vim \
         wget \
         supervisor \
+        libpcre3 \
+        libpcre3-dev \
+#        uwsgi \
+#        python-gevent \
+#        uwsgi-plugin-gevent-python \
     && apt-get -q clean \
     && rm -rf /var/lib/apt/lists/*
+
+RUN pip install uwsgi
 
 # Define environment variables
 ENV CKAN_HOME /usr/lib/ckan
@@ -36,7 +43,9 @@ ENV CKAN_VERSION=ckan-2.8.2
 ARG CKAN_SITE_URL
 
 # Create ckan user
-RUN useradd -r -u 900 -m -c "ckan account" -d $CKAN_HOME -s /bin/false ckan
+#RUN useradd -r -u 900 -m -c "ckan account" -d $CKAN_HOME -s /bin/false ckan
+RUN addgroup --gid 900 --system ckan
+RUN adduser --uid 900 --home $CKAN_HOME --system --gid 900 ckan
 
 # Setup virtual environment for CKAN
 RUN mkdir -p $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH && \
@@ -49,16 +58,12 @@ RUN git clone https://github.com/ckan/ckan.git $CKAN_VENV/src/ckan && \
     cd $CKAN_VENV/src/ckan && \
     git fetch && \
     git checkout $CKAN_VERSION
-RUN ckan-pip install -U pip && \
+RUN ckan-pip install -U pip uwsgi gevent && \
     ckan-pip install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirement-setuptools.txt && \
     ckan-pip install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirements.txt && \
     ckan-pip install -e $CKAN_VENV/src/ckan/ && \
     ln -s $CKAN_VENV/src/ckan/ckan/config/who.ini $CKAN_CONFIG/who.ini && \
-    cp -v $CKAN_VENV/src/ckan/contrib/docker/ckan-entrypoint.sh /ckan-entrypoint.sh && \
-    chmod +x /ckan-entrypoint.sh && \
     chown -R ckan:ckan $CKAN_HOME $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH
-
-# Defra specific
 
 # Copy production.ini over so it's accessiblele during build
 COPY ./compose/ckan/config/production.ini /etc/ckan/production.ini
@@ -77,7 +82,7 @@ RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-harvest
 RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-harvest/pip-requirements.txt
 
 # Defra plugin
-COPY ./ckanext-defra /usr/lib/ckan/venv/src/ckanext-defra
+COPY ./ckan-extensions/ckanext-defra /usr/lib/ckan/venv/src/ckanext-defra
 RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-defra/dev-requirements.txt
 
 # Need to be root to create the egg file
@@ -85,8 +90,15 @@ USER root
 RUN /usr/lib/ckan/venv/bin/pip install -e /usr/lib/ckan/venv/src/ckanext-defra/
 
 # Copy init file
-COPY ./compose/ckan/ckan-entrypoint.sh /ckan-entrypoint.sh
+COPY ./compose/ckan/ckan-production-entrypoint.sh /ckan-entrypoint.sh
 RUN chmod a+x /ckan-entrypoint.sh
+
+# Copy the supervisor config
+RUN mkdir -p /etc/supervisor/conf.d
+COPY ./compose/supervisor/config /etc/supervisor/conf.d
+
+# Copy uwsgi config
+COPY ./compose/ckan/config/uwsgi.conf /uwsgi.conf
 
 RUN mkdir /var/log/ckan/
 
@@ -95,4 +107,4 @@ ENTRYPOINT ["/ckan-entrypoint.sh"]
 USER ckan
 EXPOSE 5000
 
-CMD ["ckan-paster", "serve", "/etc/ckan/production.ini", "--reload"]
+#CMD ["ckan-paster", "serve", "/etc/ckan/production.ini", "--reload"]

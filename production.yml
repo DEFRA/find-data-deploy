@@ -1,27 +1,51 @@
-# docker-compose build && docker-compose up -d
-# If "docker-compose logs ckan" shows DB not ready, run "docker-compose restart ckan" a few times.
 version: "3"
 
 volumes:
   pg_data:
+  ckan_storage:
 
 services:
+
+  nginx:
+    container_name: mdf-prod-nginx
+    build:
+      context: .
+      dockerfile: ./compose/nginx/Dockerfile
+    volumes:
+      - ./compose/nginx/config/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - ckan
+      - location
+    links:
+      - ckan
+      - location
+    restart: always
+    ports:
+      - "80:80"
+    expose:
+      - "80"
+      - "443"
+
   ckan:
-    container_name: mdf-ckan
+    container_name: mdf-prod-ckan
     build:
       context: .
       dockerfile: compose/ckan/Dockerfile
       args:
         - CKAN_SITE_URL=${CKAN_SITE_URL}
+    volumes:
+      - ckan_storage:/var/lib/ckan
+    restart: always
     links:
       - db
       - solr
       - redis
-      - mailhog
       - datapusher
       - location
+    expose:
+      - "5000"
     ports:
-      - "0.0.0.0:${CKAN_PORT}:5000"
+      - "5000:5000"
     environment:
       - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/ckan_default
       - CKAN_DATASTORE_WRITE_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/datastore
@@ -34,61 +58,22 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
       - CKAN_INI=/etc/ckan/production.ini
-    volumes:
-      - ./compose/ckan/ckan-dev-entrypoint.sh:/ckan-entrypoint.sh
-      - ./compose/ckan/config/development.ini:/etc/ckan/production.ini
-      - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
     command:
       /usr/lib/ckan/venv/bin/paster serve /etc/ckan/production.ini --reload
 
-  datapusher:
-    container_name: mdf-datapusher
-    image: clementmouchet/datapusher
-    ports:
-      - "8800:8800"
-
-  db:
-    container_name: mdf-db
-    build:
-      context: .
-      dockerfile: compose/postgresql/Dockerfile
-      args:
-        - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
-        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    environment:
-      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    volumes:
-      - pg_data:/var/lib/postgresql/data
-    ports:
-      - "5433:5432"
-
-  solr:
-    container_name: mdf-solr
-    build:
-      context: .
-      dockerfile: compose/solr/Dockerfile
-    ports:
-      - "8983:8983"
-
-  redis:
-    container_name: mdf-redis
-    image: redis:latest
-
   supervisor:
-    container_name: mdf-supervisor
+    container_name: mdf-prod-supervisor
     build:
       context: .
-      dockerfile: compose/ckan/Dockerfile-dev
+      dockerfile: compose/ckan/Dockerfile
+    volumes:
+      - ckan_storage:/var/lib/ckan
+    restart: always
     links:
       - db
       - solr
       - redis
-      - mailhog
-    volumes:
-      - ./compose/supervisor/config:/etc/supervisor/conf.d
-      - ./compose/ckan/config/development.ini:/etc/ckan/production.ini
-      - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
+      - location
     environment:
       - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/ckan_default
       - CKAN_DATASTORE_WRITE_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/datastore
@@ -107,20 +92,50 @@ services:
       /usr/bin/supervisord
 
   location:
-    container_name: mdf-location
+    container_name: mdf-prod-location
+    restart: always
     build:
       context: .
-      dockerfile: compose/location/Dockerfile-dev
-    volumes:
-      - ./services/golang/location-lookup:/go/src/location-lookup
-      - ./compose/location/data/merged_results.csv:/merged_results.csv
-    ports:
-      - "5001:5000"
+      dockerfile: ./compose/location/Dockerfile
     environment:
       - LOCATION_MERGE_FILE=/merged_results.csv
-    command: make --directory /go/src/location-lookup run
-
-  mailhog:
-    image: mailhog/mailhog:v1.0.0
     ports:
-      - "8025:8025"
+      - "5001:5000"
+
+  db:
+    container_name: mdf-prod-db
+    build:
+      context: .
+      dockerfile: compose/postgresql/Dockerfile
+      args:
+        - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    restart: always
+    environment:
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+
+  datapusher:
+    container_name: mdf-prod-datapusher
+    image: clementmouchet/datapusher
+    restart: always
+    expose:
+      - "8800"
+
+  solr:
+    container_name: mdf-prod-solr
+    build:
+      context: .
+      dockerfile: compose/solr/Dockerfile
+    restart: always
+    expose:
+      - "8983"
+
+  redis:
+    container_name: mdf-prod-redis
+    image: redis:latest
+    restart: always
