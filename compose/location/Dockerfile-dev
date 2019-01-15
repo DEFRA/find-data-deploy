@@ -15,6 +15,5 @@ RUN dep ensure -vendor-only
 # This results in a single layer image
 FROM golang:latest
 ENV LOCATION_MERGE_FILE=/merged_results.csv
-# ENTRYPOINT ["/entrypoint.sh"]
 
 CMD ["make", "--directory", "/go/src/location-lookup", "run"]
