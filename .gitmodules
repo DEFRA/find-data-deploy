@@ -1,9 +1,9 @@
 [submodule "ckan-extensions/ckanext-defra"]
 	path = ckan-extensions/ckanext-defra
 	url = git@github.com:DEFRA/ckanext-defra.git
-[submodule "ckan-extensions/ckanext-defrareports"]
-	path = ckan-extensions/ckanext-defrareports
-	url = git@github.com:niross/ckanext-defrareports.git
 [submodule "services/golang/location-lookup"]
 	path = services/golang/location-lookup
 	url = git@github.com:DEFRA/location-lookup-prototype.git
+[submodule "ckan-extensions/ckanext-defrareports"]
+	path = ckan-extensions/ckanext-defrareports
+	url = git@github.com:niross/ckanext-defrareports.git
