@@ -81,13 +81,19 @@ RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-spatial
 RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-harvest/dev-requirements.txt
 RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-harvest/pip-requirements.txt
 
+# Need to be root to create the egg files
+USER root
+
 # Defra plugin
 COPY ./ckan-extensions/ckanext-defra /usr/lib/ckan/venv/src/ckanext-defra
 RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-defra/dev-requirements.txt
-
-# Need to be root to create the egg file
-USER root
 RUN /usr/lib/ckan/venv/bin/pip install -e /usr/lib/ckan/venv/src/ckanext-defra/
+
+# Defrareports plugin
+COPY ./ckan-extensions/ckanext-defrareports /usr/lib/ckan/venv/src/ckanext-defrareports
+RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-defrareports/requirements.txt
+RUN /usr/lib/ckan/venv/bin/pip install -e /usr/lib/ckan/venv/src/ckanext-defrareports/
+
 
 # Copy init file
 COPY ./compose/ckan/ckan-production-entrypoint.sh /ckan-entrypoint.sh
@@ -106,5 +112,3 @@ ENTRYPOINT ["/ckan-entrypoint.sh"]
 
 USER ckan
 EXPOSE 5000
-
-#CMD ["ckan-paster", "serve", "/etc/ckan/production.ini", "--reload"]
