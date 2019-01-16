@@ -2,7 +2,7 @@
 
 1. Grab the repo
     ```
-    git clone --recursive git@gitlab.com:nickross/defra-mdf.git
+    git clone --recursive git@github.com:niross/defra-mdf.git
     cd defra-mdf
     ```
 
