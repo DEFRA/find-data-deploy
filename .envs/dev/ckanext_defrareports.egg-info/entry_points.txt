@@ -1,0 +1,7 @@
+
+        [ckan.plugins]
+        defrareports=ckanext.defrareports.plugin:DefraReportsPlugin
+
+        [babel.extractors]
+        ckan = ckan.lib.extract:extract_ckan
+    

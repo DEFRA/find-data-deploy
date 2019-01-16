@@ -38,6 +38,7 @@ services:
       - ./compose/ckan/ckan-dev-entrypoint.sh:/ckan-entrypoint.sh
       - ./compose/ckan/config/development.ini:/etc/ckan/production.ini
       - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
+      - ./ckan-extensions/ckanext-defrareports:/usr/lib/ckan/venv/src/ckanext-defrareports
     command:
       /usr/lib/ckan/venv/bin/paster serve /etc/ckan/production.ini --reload
 
