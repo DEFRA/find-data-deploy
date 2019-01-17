@@ -1,4 +1,4 @@
-FROM golang:latest AS builder
+FROM golang:latest
 
 # Install tools required to build the project
 RUN apt-get install -y git
@@ -20,8 +20,6 @@ COPY ./services/golang/location-lookup/* /go/src/location-lookup/
 RUN go build -o /bin/project *.go
 
 # This results in a single layer image
-FROM golang:latest
 ENV LOCATION_MERGE_FILE=/merged_results.csv
-COPY --from=builder /merged_results.csv /
-COPY --from=builder /bin/project /bin/project
+
 CMD ["/bin/project"]
