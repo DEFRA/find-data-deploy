@@ -17,7 +17,9 @@
 3. Get it running
     * cd to the root project dir `cd ../../../`
     * Get a copy of the dev environment variables `cp .envs/dev/.env .`
-    * Copy the pre-prepared egg directory into the defra plugin to allow for an editable install `cp -r .envs/dev/ckanext_defra.egg-info ckan-extensions/ckanext-defra/`
+    * Copy the pre-prepared egg directories into the defra plugins to allow for an editable install
+      * `cp -r .envs/dev/ckanext_defra.egg-info ckan-extensions/ckanext-defra/`
+      * `cp -r .envs/dev/ckanext_defrareports.egg-info ckan-extensions/ckanext-defrareports/`
     * Alias ckan to localhost (required for working with datapusher)
         * Add `127.0.1.1      ckan` to `/etc/hosts` 
     * Bring the containers up `docker-compose -f development.yml up`
