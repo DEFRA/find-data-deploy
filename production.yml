@@ -8,6 +8,7 @@ services:
 
   nginx:
     container_name: mdf-prod-nginx
+    image: mdf-nginx
     build:
       context: .
       dockerfile: ./compose/nginx/Dockerfile
@@ -26,6 +27,7 @@ services:
 
   ckan:
     container_name: mdf-prod-ckan
+    image: mdf-ckan
     build:
       context: .
       dockerfile: compose/ckan/Dockerfile
@@ -39,7 +41,6 @@ services:
       - solr
       - redis
       - datapusher
-      - location
     expose:
       - "5000"
     ports:
@@ -61,6 +62,7 @@ services:
 
   supervisor:
     container_name: mdf-prod-supervisor
+    image: mdf-supervisor
     build:
       context: .
       dockerfile: compose/ckan/Dockerfile
@@ -102,6 +104,7 @@ services:
 
   db:
     container_name: mdf-prod-db
+    image: mdf-db
     build:
       context: .
       dockerfile: compose/postgresql/Dockerfile
@@ -126,6 +129,7 @@ services:
 
   solr:
     container_name: mdf-prod-solr
+    image: mdf-solr
     build:
       context: .
       dockerfile: compose/solr/Dockerfile
