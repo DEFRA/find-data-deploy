@@ -1,5 +1,5 @@
 # See CKAN docs on installation from Docker Compose on usage
-FROM debian:stretch as builder
+FROM debian:stretch
 MAINTAINER Defra
 
 # Install required system packages
@@ -24,9 +24,6 @@ RUN apt-get -q -y update \
         supervisor \
         libpcre3 \
         libpcre3-dev \
-#        uwsgi \
-#        python-gevent \
-#        uwsgi-plugin-gevent-python \
     && apt-get -q clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -93,7 +90,6 @@ RUN /usr/lib/ckan/venv/bin/pip install -e /usr/lib/ckan/venv/src/ckanext-defra/
 COPY ./ckan-extensions/ckanext-defrareports /usr/lib/ckan/venv/src/ckanext-defrareports
 RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-defrareports/requirements.txt
 RUN /usr/lib/ckan/venv/bin/pip install -e /usr/lib/ckan/venv/src/ckanext-defrareports/
-
 
 # Copy init file
 COPY ./compose/ckan/ckan-production-entrypoint.sh /ckan-entrypoint.sh
