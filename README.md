@@ -52,3 +52,15 @@
 6. User
     * Create a superuser account for yourself ``docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan sysadmin add <YOUR USERNAME> email=<YOUR EMAIL> name=<YOUR USERNAME> -c /etc/ckan/production.ini``
     
+
+### Deploying to Azure
+
+Until we have set up a proper container registry we deploy by creating an ssh tunnel to our azure container service and pointing to docker to it.
+
+Note: You will need to set up ssh keys and get them added to the container service either on the Azure portal or ask a developer with access to help you.
+
+To deploy:
+
+1. Create the tunnel `ssh dockeruser@51.141.98.150 -p 2200 -L 22375:127.0.0.1:2375`
+2. Point docker to the remote service `export DOCKER_HOST=":22375"`
+3. Bring the containers up `docker-compose -f production.yml up -d`
