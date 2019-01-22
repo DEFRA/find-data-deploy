@@ -91,6 +91,37 @@ services:
     command:
       /usr/bin/supervisord
 
+  cron:
+    container_name: mdf-prod-cron
+    image: mdf-cron
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile
+    volumes:
+      - ckan_storage:/var/lib/ckan
+    restart: always
+    links:
+      - db
+      - solr
+      - redis
+      - location
+    environment:
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/ckan_default
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/datastore
+      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
+      - CKAN_SOLR_URL=http://solr:8983/solr/ckan
+      - CKAN_REDIS_URL=redis://redis:6379/1
+      - CKAN_DATAPUSHER_URL=http://datapusher:8800
+      - CKAN_SITE_URL=${CKAN_SITE_URL}
+      - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      - CKAN_INI=/etc/ckan/production.ini
+    entrypoint: ""
+    user: root
+    command:
+      cron -f
+
   location:
     container_name: mdf-prod-location
     restart: always

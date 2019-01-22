@@ -24,6 +24,7 @@ RUN apt-get -q -y update \
         supervisor \
         libpcre3 \
         libpcre3-dev \
+        cron \
     && apt-get -q clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -102,7 +103,13 @@ COPY ./compose/supervisor/config /etc/supervisor/conf.d
 # Copy uwsgi config
 COPY ./compose/ckan/config/uwsgi.conf /uwsgi.conf
 
+# Set up log dirs
+RUN touch /var/log/cron.log
 RUN mkdir /var/log/ckan/
+
+# Set up cron
+COPY ./compose/cron/config/cronjobs /etc/cron.d/cronjobs
+RUN crontab /etc/cron.d/cronjobs
 
 ENTRYPOINT ["/ckan-entrypoint.sh"]
 
