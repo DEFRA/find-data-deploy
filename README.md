@@ -3,7 +3,7 @@
 1. Grab the repo
     ```
     git clone --recursive git@github.com:DEFRA/defradata-ckan-deploy.git
-    cd defra-mdf
+    cd defradata-ckan-deploy
     ```
 
 2. Grab the location data
