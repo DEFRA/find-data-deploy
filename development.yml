@@ -1,0 +1,161 @@
+# docker-compose build && docker-compose up -d
+# If "docker-compose logs ckan" shows DB not ready, run "docker-compose restart ckan" a few times.
+version: "3"
+
+volumes:
+  pg_data:
+
+services:
+  ckan:
+    container_name: mdf-ckan
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile
+      args:
+        - CKAN_SITE_URL=${CKAN_SITE_URL}
+    links:
+      - db
+      - solr
+      - redis
+      - mailhog
+      - datapusher
+      - location
+    ports:
+      - "0.0.0.0:${CKAN_PORT}:5000"
+    environment:
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/ckan_default
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/datastore
+      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
+      - CKAN_SOLR_URL=http://solr:8983/solr/ckan
+      - CKAN_REDIS_URL=redis://redis:6379/1
+      - CKAN_DATAPUSHER_URL=http://datapusher:8800
+      - CKAN_SITE_URL=${CKAN_SITE_URL}
+      - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      - CKAN_INI=/etc/ckan/production.ini
+    volumes:
+      - ./compose/ckan/ckan-dev-entrypoint.sh:/ckan-entrypoint.sh
+      - ./compose/ckan/config/development.ini:/etc/ckan/production.ini
+      - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
+      - ./ckan-extensions/ckanext-defrareports:/usr/lib/ckan/venv/src/ckanext-defrareports
+    command:
+      /usr/lib/ckan/venv/bin/paster serve /etc/ckan/production.ini --reload
+
+  datapusher:
+    container_name: mdf-datapusher
+    image: clementmouchet/datapusher
+    ports:
+      - "8800:8800"
+
+  db:
+    container_name: mdf-db
+    build:
+      context: .
+      dockerfile: compose/postgresql/Dockerfile
+      args:
+        - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    environment:
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  solr:
+    container_name: mdf-solr
+    build:
+      context: .
+      dockerfile: compose/solr/Dockerfile
+    ports:
+      - "8983:8983"
+
+  redis:
+    container_name: mdf-redis
+    image: redis:latest
+
+  supervisor:
+    container_name: mdf-supervisor
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile-dev
+    links:
+      - db
+      - solr
+      - redis
+      - mailhog
+    volumes:
+      - ./compose/supervisor/config:/etc/supervisor/conf.d
+      - ./compose/ckan/config/development.ini:/etc/ckan/production.ini
+      - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
+      - ./ckan-extensions/ckanext-defrareports:/usr/lib/ckan/venv/src/ckanext-defrareports
+    environment:
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/ckan_default
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/datastore
+      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
+      - CKAN_SOLR_URL=http://solr:8983/solr/ckan
+      - CKAN_REDIS_URL=redis://redis:6379/1
+      - CKAN_DATAPUSHER_URL=http://datapusher:8800
+      - CKAN_SITE_URL=${CKAN_SITE_URL}
+      - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      - CKAN_INI=/etc/ckan/production.ini
+    entrypoint: ""
+    user: root
+    command:
+      /usr/bin/supervisord
+
+  cron:
+    container_name: mdf-cron
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile-dev
+    links:
+      - db
+      - solr
+      - redis
+      - mailhog
+    volumes:
+      - ./compose/ckan/ckan-dev-entrypoint.sh:/ckan-entrypoint.sh
+      - ./compose/ckan/config/development.ini:/etc/ckan/production.ini
+      - ./compose/cron/config/cronjobs:/etc/cron.d/cronjobs
+      - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
+      - ./ckan-extensions/ckanext-defrareports:/usr/lib/ckan/venv/src/ckanext-defrareports
+    environment:
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/ckan_default
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/datastore
+      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
+      - CKAN_SOLR_URL=http://solr:8983/solr/ckan
+      - CKAN_REDIS_URL=redis://redis:6379/1
+      - CKAN_DATAPUSHER_URL=http://datapusher:8800
+      - CKAN_SITE_URL=${CKAN_SITE_URL}
+      - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      - CKAN_INI=/etc/ckan/production.ini
+    entrypoint: ""
+    user: root
+    command:
+      cron -f
+
+  location:
+    container_name: mdf-location
+    build:
+      context: .
+      dockerfile: compose/location/Dockerfile-dev
+    volumes:
+      - ./services/golang/location-lookup:/go/src/location-lookup
+      - ./compose/location/data/merged_results.csv:/merged_results.csv
+    ports:
+      - "5001:5000"
+    environment:
+      - LOCATION_MERGE_FILE=/merged_results.csv
+    command: make --directory /go/src/location-lookup run
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.0
+    ports:
+      - "8025:8025"

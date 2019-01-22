@@ -1,62 +1,52 @@
-# Defra finding data prototype/demo
+### Get up and running locally
 
-This repo contains ansible scripts for setting up the [demonstration server](http://dd-find-proto.ukwest.cloudapp.azure.com/).
+1. Grab the repo
+    ```
+    git clone --recursive git@github.com:DEFRA/defradata-ckan-deploy
+    cd defradata-ckan-deploy
+    ```
 
-The process isn't faultless yet, and may require a bit of fiddliness to get up and running, but this instructions below should get you started.
+2. Grab the location data
+    * Download the OS Open Names CSV from the [Ordinance Survey Website](https://www.ordnancesurvey.co.uk/opendatadownload/products.html#OPNAME)
+    * Make a temporary directory to hold the data `mkdir compose/location/data/`
+    * Unzip the downloaded csv to compose/location/data/
+    * cd to the data dir `cd compose/location/data/`
+    * Unzip the file `unzip opname_csv_gb.zip`
+    * Merge all data into a single file for the go app `cat DATA/* | grep populatedPlace > merged_results.csv`
 
-## Installation
+3. Get it running
+    * cd to the root project dir `cd ../../../`
+    * Get a copy of the dev environment variables `cp .envs/dev/.env .`
+    * Copy the pre-prepared egg directory into the defra plugin to allow for an editable install `cp -r .envs/dev/ckanext_defra.egg-info ckan-extensions/ckanext-defra/`
+    * Alias ckan to localhost (required for working with datapusher)
+        * Add `127.0.1.1      ckan` to `/etc/hosts`
+    * Bring the containers up `docker-compose -f development.yml up`
+    * Visit http://ckan:5000
+    * If ckan doesn't load after you first bring the containers up:
+        * This is most likely caused by a race condition between the ckan container and the db.
+        * Restarting the ckan container should sort it out `docker-compose -f development.yml up -d ckan`
 
-* Check out this repository
-* `git clone git@gitlab.com:rossjones/defra-data-deploy.git && cd defra-data-deploy`.
-* `mkdir src`
-* `. setup_repos.sh`
-* You probably need to change the Vagrantfile to another provider if you are not using Hyper-V
-* `vagrant up`
-* It's easiest to run these scripts inside the VM by using `vagrant ssh` and then `cd /vagrant/deploy && pip install ansible`
-* The scripts are run individually to ensure they complete
-* `ansible-playbook --connection=local -i production common.yml`
-* `ansible-playbook --connection=local -i production postgres.yml`
-* `ansible-playbook --connection=local -i production solr.yml`
-* `ansible-playbook --connection=local -i production ckan.yml`
+4. Import Data
 
-## How things are set up
+    TODO: This will change significantly once alpha is live
 
-```
-Nginx -> Apache(WSGI) -> Postgres
-                      |
-                      -> Solr
-```
+    * Stop the ckan and supervisor containers to stop them locking tables in the db
+        * `docker-compose -f development.yml stop ckan`
+        * `docker-compose -f development.yml stop supervisor`
+    * SSH to the prototype `ssh vagrant@dd-find-proto.ukwest.cloudapp.azure.com`
+    * Dump the db ``sudo -u postgres pg_dump ckan_default > /tmp/ckan-backup-`date +%F`.sql``
+    * Tar the sql file ``tar -czvf "/tmp/ckan-backup-`date +%F`.tgz"  -C /tmp/ "ckan-backup-`date +%F`.sql"``
+    * Exit back to your local machine `exit`
+    * Copy the tar file locally ``scp vagrant@dd-find-proto.ukwest.cloudapp.azure.com:/tmp/ckan-backup-`date +%F`.tgz /tmp/``
+    * Untar the sql ``tar -xzf /tmp/ckan-backup-`date +%F`.tgz -C /tmp/``
+    * Ensure roles exists in the db (pass: ckan) `psql -h localhost -d postgres -p 5433 -U ckan_default -c 'CREATE USER postgres SUPERUSER;'`
+    * Run the sql (pass: ckan) ``psql -h localhost -p 5433 -U ckan_default < /tmp/ckan-backup-`date +%F`.sql``
+    * Restart all containers `docker-compose -f development.yml up -d`
+    * You will also probably need to rebuild the solr search index `docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan search-index rebuild -o --config=/etc/ckan/production.ini`
 
-The nginx as router, and Apache as apphost thing probably isn't ideal, but it's the bog-standard way of installing CKAN just because nginx is nicer for routing than Apache.  We _could_ set it up with nginx->gunicon/uwsgi/whatever but there's little need for the demo.
+5. Setup Datastore
+  * Set postgres permissions ``docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan datastore set-permissions -c /etc/ckan/production.ini | psql -h db -U ckan_default --set ON_ERROR_STOP=1``
+  * Add existing datasets to the datastore``docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan datapusher submit_all -c /etc/ckan/production.ini``
+6. User
+    * Create a superuser account for yourself ``docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan sysadmin add <YOUR USERNAME> email=<YOUR EMAIL> name=<YOUR USERNAME> -c /etc/ckan/production.ini``
 
-Most of the following will be set up by the Ansible scripts, but always helpful to know where stuff is.
-
-    Nginx config is in `/etc/nginx/sites-enabled/ckan`
-    Apache config is in `/etc/apache/sites-enabled/ckan_default.conf`
-    The CKAN ini file is at `/etc/ckan/default/production.ini`
-
-The virtualenv that the CKAN 'app' runs in is at `/usr/lib/ckan/default` and the source code for our extensions ends up at `/vagrant/src`. Don't forget to start the venv before doing 'stuff' (`. /usr/lib/ckan/default/bin/activate`).
-
-The main extension we use is ckanext-defra which contains our code and templates and other modifications of the base CKAN install. The best place to start (after the [CKAN docs](https://docs.ckan.org/en/2.8/))  is in `ckanext-defra/ckanext/defra/plugin.py`.
-
-## Useful commands
-
-These are things we tend to need to do from time-to-time...
-
-Restarting Apache .. `sudo service apache2 restart`
-
-Access the database .. `sudo -u postgres psql ckan_default`
-
-Restart solr .. `sudo service jetty8 restart`
-
-Most of the interaction with administering CKAN is via `paster` commands.  Some useful ones are:
-
-```
-# Get a helpful list of command from a plugin
-paster --plugin=ckan
-# or
-paster --plugin=ckanext-defra
-
-# Get help for the ckan search-index command
-paster --plugin=ckan help search-index
-```

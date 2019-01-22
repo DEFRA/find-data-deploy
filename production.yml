@@ -1,0 +1,174 @@
+version: "3"
+
+volumes:
+  pg_data:
+  ckan_storage:
+
+services:
+
+  nginx:
+    container_name: mdf-prod-nginx
+    image: mdf-nginx
+    build:
+      context: .
+      dockerfile: ./compose/nginx/Dockerfile
+    depends_on:
+      - ckan
+      - location
+    links:
+      - ckan
+      - location
+    restart: always
+    ports:
+      - "80:80"
+    expose:
+      - "80"
+      - "443"
+
+  ckan:
+    container_name: mdf-prod-ckan
+    image: mdf-ckan
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile
+      args:
+        - CKAN_SITE_URL=${CKAN_SITE_URL}
+    volumes:
+      - ckan_storage:/var/lib/ckan
+    restart: always
+    links:
+      - db
+      - solr
+      - redis
+      - datapusher
+    expose:
+      - "5000"
+    ports:
+      - "5000:5000"
+    environment:
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/ckan_default
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/datastore
+      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
+      - CKAN_SOLR_URL=http://solr:8983/solr/ckan
+      - CKAN_REDIS_URL=redis://redis:6379/1
+      - CKAN_DATAPUSHER_URL=http://datapusher:8800
+      - CKAN_SITE_URL=${CKAN_SITE_URL}
+      - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      - CKAN_INI=/etc/ckan/production.ini
+    command:
+      /usr/lib/ckan/venv/bin/paster serve /etc/ckan/production.ini --reload
+
+  supervisor:
+    container_name: mdf-prod-supervisor
+    image: mdf-supervisor
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile
+    volumes:
+      - ckan_storage:/var/lib/ckan
+    restart: always
+    links:
+      - db
+      - solr
+      - redis
+      - location
+    environment:
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/ckan_default
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/datastore
+      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
+      - CKAN_SOLR_URL=http://solr:8983/solr/ckan
+      - CKAN_REDIS_URL=redis://redis:6379/1
+      - CKAN_DATAPUSHER_URL=http://datapusher:8800
+      - CKAN_SITE_URL=${CKAN_SITE_URL}
+      - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      - CKAN_INI=/etc/ckan/production.ini
+    entrypoint: ""
+    user: root
+    command:
+      /usr/bin/supervisord
+
+  cron:
+    container_name: mdf-prod-cron
+    image: mdf-cron
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile
+    volumes:
+      - ckan_storage:/var/lib/ckan
+    restart: always
+    links:
+      - db
+      - solr
+      - redis
+      - location
+    environment:
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/ckan_default
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db/datastore
+      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
+      - CKAN_SOLR_URL=http://solr:8983/solr/ckan
+      - CKAN_REDIS_URL=redis://redis:6379/1
+      - CKAN_DATAPUSHER_URL=http://datapusher:8800
+      - CKAN_SITE_URL=${CKAN_SITE_URL}
+      - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      - CKAN_INI=/etc/ckan/production.ini
+    entrypoint: ""
+    user: root
+    command:
+      cron -f
+
+  location:
+    container_name: mdf-prod-location
+    restart: always
+    build:
+      context: .
+      dockerfile: ./compose/location/Dockerfile
+    environment:
+      - LOCATION_MERGE_FILE=/merged_results.csv
+    ports:
+      - "5001:5000"
+
+  db:
+    container_name: mdf-prod-db
+    image: mdf-db
+    build:
+      context: .
+      dockerfile: compose/postgresql/Dockerfile
+      args:
+        - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    restart: always
+    environment:
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+
+  datapusher:
+    container_name: mdf-prod-datapusher
+    image: clementmouchet/datapusher
+    restart: always
+    expose:
+      - "8800"
+
+  solr:
+    container_name: mdf-prod-solr
+    image: mdf-solr
+    build:
+      context: .
+      dockerfile: compose/solr/Dockerfile
+    restart: always
+    expose:
+      - "8983"
+
+  redis:
+    container_name: mdf-prod-redis
+    image: redis:latest
+    restart: always
