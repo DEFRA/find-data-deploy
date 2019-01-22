@@ -39,9 +39,11 @@ ENV CKAN_VERSION=ckan-2.8.2
 
 # Build-time variables specified by docker-compose.yml / .env
 ARG CKAN_SITE_URL
+ARG GOOGLE_ANALYTICS_SITE_ID
+ARG GOOGLE_ANALYTICS_USERNAME
+ARG GOOGLE_ANALYTICS_PASSWORD
 
 # Create ckan user
-#RUN useradd -r -u 900 -m -c "ckan account" -d $CKAN_HOME -s /bin/false ckan
 RUN addgroup --gid 900 --system ckan
 RUN adduser --uid 900 --home $CKAN_HOME --system --gid 900 ckan
 
@@ -66,6 +68,11 @@ RUN ckan-pip install -U pip uwsgi gevent && \
 # Copy production.ini over so it's accessiblele during build
 COPY ./compose/ckan/config/production.ini /etc/ckan/production.ini
 
+# Add google analytics info to ini file
+RUN sed -i -e "s/^googleanalytics.id.*/googleanalytics.id = $GOOGLE_ANALYTICS_SITE_ID/g" /etc/ckan/production.ini
+RUN sed -i -e "s/^googleanalytics.username.*/googleanalytics.username = $GOOGLE_ANALYTICS_USERNAME/g" /etc/ckan/production.ini
+RUN sed -i -e "s/^googleanalytics.password.*/googleanalytics.password = $GOOGLE_ANALYTICS_PASSWORD/g" /etc/ckan/production.ini
+
 # Install ckan
 COPY ./compose/ckan/requirements.txt /requirements.txt
 RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckan/dev-requirements.txt
@@ -76,7 +83,6 @@ RUN /usr/lib/ckan/venv/bin/pip install -r /requirements.txt
 # Extra requirements files for ckan extensions
 RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-dcat/requirements.txt
 RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-spatial/pip-requirements.txt
-RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-harvest/dev-requirements.txt
 RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-harvest/pip-requirements.txt
 
 # Need to be root to create the egg files
@@ -84,7 +90,6 @@ USER root
 
 # Defra plugin
 COPY ./ckan-extensions/ckanext-defra /usr/lib/ckan/venv/src/ckanext-defra
-RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-defra/dev-requirements.txt
 RUN /usr/lib/ckan/venv/bin/pip install -e /usr/lib/ckan/venv/src/ckanext-defra/
 
 # Defrareports plugin
@@ -110,6 +115,10 @@ RUN mkdir /var/log/ckan/
 # Set up cron
 COPY ./compose/cron/config/cronjobs /etc/cron.d/cronjobs
 RUN crontab /etc/cron.d/cronjobs
+
+# Copy Analytics Auth
+COPY ./compose/ckan/config/analytics-auth.json /analytics-auth.json
+
 
 ENTRYPOINT ["/ckan-entrypoint.sh"]
 

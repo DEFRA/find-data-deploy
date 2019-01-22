@@ -116,3 +116,4 @@ dmypy.json
 
 .idea
 compose/location/data/
+analytics-auth.json
