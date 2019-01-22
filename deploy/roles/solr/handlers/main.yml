@@ -1,6 +1,0 @@
----
-# Handlers for solr
-
-- name: restart solr
-  become: true
-  action: service name=jetty8 state=restarted

@@ -1,6 +1,0 @@
----
-# common role
-
-- hosts: common
-  roles:
-    - { role: common }
