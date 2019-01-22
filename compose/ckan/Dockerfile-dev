@@ -71,6 +71,8 @@ RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-dcat/re
 RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-spatial/pip-requirements.txt
 RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-harvest/dev-requirements.txt
 RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-harvest/pip-requirements.txt
+RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-googleanalytics/requirements.txt
+RUN /usr/lib/ckan/venv/bin/pip install --upgrade oauth2client
 
 # Defra plugin
 COPY ./ckan-extensions/ckanext-defra /usr/lib/ckan/venv/src/ckanext-defra
@@ -95,6 +97,9 @@ RUN mkdir /var/log/ckan/
 # Set up cron
 COPY ./compose/cron/config/cronjobs /etc/cron.d/cronjobs
 RUN crontab /etc/cron.d/cronjobs
+
+# Copy Analytics Auth
+COPY ./compose/ckan/config/analytics-auth.json /analytics-auth.json
 
 USER ckan
 EXPOSE 5000

@@ -13,6 +13,8 @@ services:
       dockerfile: compose/ckan/Dockerfile
       args:
         - CKAN_SITE_URL=${CKAN_SITE_URL}
+        - GOOGLE_ANALYTICS_SITE_ID=""
+        - GOOGLE_ANALYTICS_USERNAME=""
     links:
       - db
       - solr
@@ -39,6 +41,7 @@ services:
       - ./compose/ckan/config/development.ini:/etc/ckan/production.ini
       - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
       - ./ckan-extensions/ckanext-defrareports:/usr/lib/ckan/venv/src/ckanext-defrareports
+      - ./compose/ckan/config/analytics-auth.json:/analytics-auth.json
     command:
       /usr/lib/ckan/venv/bin/paster serve /etc/ckan/production.ini --reload
 
@@ -113,6 +116,9 @@ services:
     build:
       context: .
       dockerfile: compose/ckan/Dockerfile-dev
+      args:
+        - GOOGLE_ANALYTICS_SITE_ID=""
+        - GOOGLE_ANALYTICS_USERNAME=""
     links:
       - db
       - solr
