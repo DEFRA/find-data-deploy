@@ -22,6 +22,7 @@ RUN apt-get -q -y update \
         vim \
         wget \
         supervisor \
+        cron \
     && apt-get -q clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -54,8 +55,6 @@ RUN ckan-pip install -U pip && \
     ckan-pip install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirements.txt && \
     ckan-pip install -e $CKAN_VENV/src/ckan/ && \
     ln -s $CKAN_VENV/src/ckan/ckan/config/who.ini $CKAN_CONFIG/who.ini && \
-    cp -v $CKAN_VENV/src/ckan/contrib/docker/ckan-dev-entrypoint.sh /ckan-dev-entrypoint.sh && \
-    chmod +x /ckan-dev-entrypoint.sh && \
     chown -R ckan:ckan $CKAN_HOME $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH
 
 # Defra specific
@@ -89,11 +88,13 @@ RUN /usr/lib/ckan/venv/bin/pip install -e /usr/lib/ckan/venv/src/ckanext-defra/
 COPY ./compose/ckan/ckan-dev-entrypoint.sh /ckan-dev-entrypoint.sh
 RUN chmod a+x /ckan-dev-entrypoint.sh
 
+# Set up log dirs
+RUN touch /var/log/cron.log
 RUN mkdir /var/log/ckan/
 
-ENTRYPOINT ["/ckan-dev-entrypoint.sh"]
+# Set up cron
+COPY ./compose/cron/config/cronjobs /etc/cron.d/cronjobs
+RUN crontab /etc/cron.d/cronjobs
 
 USER ckan
 EXPOSE 5000
-
-CMD ["ckan-paster", "serve", "/etc/ckan/production.ini", "--reload"]
