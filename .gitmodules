@@ -6,4 +6,4 @@
 	url = git@github.com:DEFRA/location-lookup-prototype.git
 [submodule "ckan-extensions/ckanext-defrareports"]
 	path = ckan-extensions/ckanext-defrareports
-	url = git@github.com:niross/ckanext-defrareports.git
+	url = git@github.com:DEFRA/ckanext-defrareports.git
