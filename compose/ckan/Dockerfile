@@ -42,6 +42,7 @@ ARG CKAN_SITE_URL
 ARG GOOGLE_ANALYTICS_SITE_ID
 ARG GOOGLE_ANALYTICS_USERNAME
 ARG GOOGLE_ANALYTICS_PASSWORD
+ARG SENTRY_DSN
 
 # Create ckan user
 RUN addgroup --gid 900 --system ckan
@@ -72,6 +73,9 @@ COPY ./compose/ckan/config/production.ini /etc/ckan/production.ini
 RUN sed -i -e "s/^googleanalytics.id.*/googleanalytics.id = $GOOGLE_ANALYTICS_SITE_ID/g" /etc/ckan/production.ini
 RUN sed -i -e "s/^googleanalytics.username.*/googleanalytics.username = $GOOGLE_ANALYTICS_USERNAME/g" /etc/ckan/production.ini
 RUN sed -i -e "s/^googleanalytics.password.*/googleanalytics.password = $GOOGLE_ANALYTICS_PASSWORD/g" /etc/ckan/production.ini
+
+# Add sentry details to the ckan config
+RUN sed -i -e "s/^sentry.dsn.*/sentry.dsn = $SENTRY_DSN/g" /etc/ckan/production.ini
 
 # Install ckan
 COPY ./compose/ckan/requirements.txt /requirements.txt
