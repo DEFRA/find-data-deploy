@@ -70,6 +70,8 @@ To deploy:
     * `export GOOGLE_ANALYTICS_SITE_ID=???`
     * `export GOOGLE_ANALYTICS_USERNAME=???`
     * `export GOOGLE_ANALYTICS_PASSWORD=???`
+2. Log in to sentry and retrieve the dsn for the Making Data Findable project
+3. Set the Sentry DSN environment variable `export SENTRY_DSN=???`
 2. Create the tunnel `ssh dockeruser@51.141.98.150 -p 2200 -L 22375:127.0.0.1:2375`
 3. Point docker to the remote service `export DOCKER_HOST=":22375"`
 4. Bring the containers up `docker-compose -f production.yml up -d`
