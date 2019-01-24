@@ -36,6 +36,7 @@ services:
         - GOOGLE_ANALYTICS_SITE_ID=${GOOGLE_ANALYTICS_SITE_ID?Please set the GOOGLE_ANALYTICS_SITE_ID env var}
         - GOOGLE_ANALYTICS_USERNAME=${GOOGLE_ANALYTICS_USERNAME?Please set the GOOGLE_ANALYTICS_USERNAME env var}
         - GOOGLE_ANALYTICS_PASSWORD=${GOOGLE_ANALYTICS_PASSWORD?Please set the GOOGLE_ANALYTICS_PASSWORD env var}
+        - SENTRY_DSN=${SENTRY_DSN?Please set the SENTRY_DSN env var}
     volumes:
       - ckan_storage:/var/lib/ckan
     restart: always
@@ -69,6 +70,8 @@ services:
     build:
       context: .
       dockerfile: compose/ckan/Dockerfile
+      args:
+        - SENTRY_DSN=${SENTRY_DSN?Please set the SENTRY_DSN env var}
     volumes:
       - ckan_storage:/var/lib/ckan
     restart: always
@@ -104,6 +107,7 @@ services:
         - GOOGLE_ANALYTICS_SITE_ID=${GOOGLE_ANALYTICS_SITE_ID?Please set the GOOGLE_ANALYTICS_SITE_ID env var}
         - GOOGLE_ANALYTICS_USERNAME=${GOOGLE_ANALYTICS_USERNAME?Please set the GOOGLE_ANALYTICS_USERNAME env var}
         - GOOGLE_ANALYTICS_PASSWORD=${GOOGLE_ANALYTICS_PASSWORD?Please set the GOOGLE_ANALYTICS_PASSWORD env var}
+        - SENTRY_DSN=${SENTRY_DSN?Please set the SENTRY_DSN env var}
     volumes:
       - ckan_storage:/var/lib/ckan
     restart: always
