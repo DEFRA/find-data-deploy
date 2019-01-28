@@ -19,6 +19,7 @@ services:
     links:
       - ckan
       - location
+      - datapusher
     restart: always
     ports:
       - "80:80"
