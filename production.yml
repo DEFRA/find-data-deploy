@@ -15,6 +15,7 @@ services:
     depends_on:
       - ckan
       - location
+      - datapusher
     links:
       - ckan
       - location
