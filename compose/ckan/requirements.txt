@@ -12,3 +12,4 @@ lxml==4.2.5
 shapely==1.6.4
 ckanapi==4.1
 OWSLib==0.17.0
+ckanext-sentry==0.0.2
