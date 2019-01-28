@@ -75,7 +75,7 @@ RUN sed -i -e "s/^googleanalytics.username.*/googleanalytics.username = $GOOGLE_
 RUN sed -i -e "s/^googleanalytics.password.*/googleanalytics.password = $GOOGLE_ANALYTICS_PASSWORD/g" /etc/ckan/production.ini
 
 # Add sentry details to the ckan config
-RUN sed -i -e "s/^sentry.dsn.*/sentry.dsn = $SENTRY_DSN/g" /etc/ckan/production.ini
+RUN sed -i "s|^sentry.dsn.*|sentry.dsn = $SENTRY_DSN|g"  /etc/ckan/production.ini
 
 # Install ckan
 COPY ./compose/ckan/requirements.txt /requirements.txt
