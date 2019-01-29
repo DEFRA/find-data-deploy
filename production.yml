@@ -39,6 +39,7 @@ services:
         - GOOGLE_ANALYTICS_USERNAME=${GOOGLE_ANALYTICS_USERNAME?Please set the GOOGLE_ANALYTICS_USERNAME env var}
         - GOOGLE_ANALYTICS_PASSWORD=${GOOGLE_ANALYTICS_PASSWORD?Please set the GOOGLE_ANALYTICS_PASSWORD env var}
         - SENTRY_DSN=${SENTRY_DSN?Please set the SENTRY_DSN env var}
+        - SENDGRID_PASSWORD=${SENDGRID_PASSWORD?Please set the SENDGRID_PASSWORD env var}
     volumes:
       - ckan_storage:/var/lib/ckan
     restart: always
@@ -74,6 +75,7 @@ services:
       dockerfile: compose/ckan/Dockerfile
       args:
         - SENTRY_DSN=${SENTRY_DSN?Please set the SENTRY_DSN env var}
+        - SENDGRID_PASSWORD=${SENDGRID_PASSWORD?Please set the SENDGRID_PASSWORD env var}
     volumes:
       - ckan_storage:/var/lib/ckan
     restart: always
@@ -110,6 +112,7 @@ services:
         - GOOGLE_ANALYTICS_USERNAME=${GOOGLE_ANALYTICS_USERNAME?Please set the GOOGLE_ANALYTICS_USERNAME env var}
         - GOOGLE_ANALYTICS_PASSWORD=${GOOGLE_ANALYTICS_PASSWORD?Please set the GOOGLE_ANALYTICS_PASSWORD env var}
         - SENTRY_DSN=${SENTRY_DSN?Please set the SENTRY_DSN env var}
+        - SENDGRID_PASSWORD=${SENDGRID_PASSWORD?Please set the SENDGRID_PASSWORD env var}
     volumes:
       - ckan_storage:/var/lib/ckan
     restart: always
