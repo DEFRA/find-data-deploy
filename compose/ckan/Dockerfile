@@ -43,6 +43,7 @@ ARG GOOGLE_ANALYTICS_SITE_ID
 ARG GOOGLE_ANALYTICS_USERNAME
 ARG GOOGLE_ANALYTICS_PASSWORD
 ARG SENTRY_DSN
+ARG SENDGRID_PASSWORD
 
 # Create ckan user
 RUN addgroup --gid 900 --system ckan
@@ -76,6 +77,9 @@ RUN sed -i -e "s/^googleanalytics.password.*/googleanalytics.password = $GOOGLE_
 
 # Add sentry details to the ckan config
 RUN sed -i "s|^sentry.dsn.*|sentry.dsn = $SENTRY_DSN|g"  /etc/ckan/production.ini
+
+# Add sendgrid password to the ckan config
+RUN sed -i "s|^smtp.password.*|smtp.password = $SENDGRID_PASSWORD|g"  /etc/ckan/production.ini
 
 # Install ckan
 COPY ./compose/ckan/requirements.txt /requirements.txt
