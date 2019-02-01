@@ -88,6 +88,9 @@ if [ ! -f /tmp/.initialized ]; then
     # Setup tracking cronjob
     ckan-paster --plugin=ckan tracking update -c /etc/ckan/production.ini && ckan-paster --plugin=ckan search-index rebuild -r -c /etc/ckan/production.ini
 
+    # Initialise the analytics db
+    ckan-paster --plugin=ckanext-ga-report initdb -c /etc/ckan/production.ini
+
     touch /tmp/.initialized
 fi
 

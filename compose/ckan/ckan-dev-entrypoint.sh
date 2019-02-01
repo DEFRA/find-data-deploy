@@ -85,8 +85,8 @@ if [ ! -f /tmp/.initialized ]; then
     # Initialise the spatial database
     ckan-paster --plugin=ckanext-spatial spatial initdb 4326 -c /etc/ckan/production.ini
 
-    # Setup tracking cronjob
-    ckan-paster --plugin=ckan tracking update -c /etc/ckan/production.ini && ckan-paster --plugin=ckan search-index rebuild -r -c /etc/ckan/production.ini
+    # Initialise the analytics db
+    ckan-paster --plugin=ckanext-ga-report initdb -c /etc/ckan/production.ini
 
     touch /tmp/.initialized
 fi
