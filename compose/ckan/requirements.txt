@@ -6,6 +6,7 @@
 -e git://github.com/pduchesne/ckanext-geoview.git#egg=ckanext-geoview
 -e git://github.com/NaturalHistoryMuseum/ckanext-dev.git#egg=ckanext-dev
 -e git://github.com/ckan/ckanext-googleanalytics.git#egg=ckanext-googleanalytics
+-e git://github.com/datagovau/ckanext-ga-report.git#egg=ckanext-ga-report
 pyOpenSSL==18.0.0
 geoalchemy2==0.5.0
 lxml==4.2.5
