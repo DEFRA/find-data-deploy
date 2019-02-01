@@ -88,6 +88,9 @@ if [ ! -f /tmp/.initialized ]; then
     # Initialise the analytics db
     ckan-paster --plugin=ckanext-ga-report initdb -c /etc/ckan/production.ini
 
+    # Initialise the analytics db
+    ckan-paster --plugin=ckanext-ga-report initdb -c /etc/ckan/production.ini
+
     touch /tmp/.initialized
 fi
 
