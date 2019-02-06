@@ -1,3 +1,4 @@
 */10 * * * * /usr/lib/ckan/venv/bin/paster --plugin=ckanext-harvest harvester run --config=/etc/ckan/production.ini > /proc/1/fd/1 2>/proc/1/fd/2
 0 * * * * /usr/lib/ckan/venv/bin/paster --plugin=ckan tracking update -c /etc/ckan/production.ini && /usr/lib/ckan/venv/bin/paster --plugin=ckan search-index rebuild -r -c /etc/ckan/production.ini > /proc/1/fd/1 2>/proc/1/fd/2
 0 0 * * * /usr/lib/ckan/venv/bin/paster --plugin=ckanext-ga-report loadanalytics latest > /proc/1/fd/1 2>/proc/1/fd/2
+0 1 * * 0 /usr/lib/ckan/venv/bin/paster --plugin=ckanext-defrareports check_broken_resources
