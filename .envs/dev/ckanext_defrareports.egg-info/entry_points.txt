@@ -5,3 +5,5 @@
         [babel.extractors]
         ckan = ckan.lib.extract:extract_ckan
     
+        [paste.paster_command]
+        check_broken_resources = ckanext.defrareports.commands.check_broken_resources:CheckBrokenResourcesCommand
