@@ -3,6 +3,8 @@ version: "3"
 volumes:
   pg_data:
   ckan_storage:
+  letsencrypt_certs:
+  letsencrypt_www:
 
 services:
 
@@ -21,8 +23,12 @@ services:
       - location
       - datapusher
     restart: always
+    volumes:
+      - letsencrypt_certs:/etc/letsencrypt
+      - letsencrypt_www:/var/www/letsencrypt
     ports:
       - "80:80"
+      - "443:443"
     expose:
       - "80"
       - "443"
@@ -34,7 +40,7 @@ services:
       context: .
       dockerfile: compose/ckan/Dockerfile
       args:
-        - CKAN_SITE_URL=${CKAN_SITE_URL}
+        - CKAN_SITE_URL=${CKAN_SITE_URL?Please set the CKAN_SITE_URL env var}
         - GOOGLE_ANALYTICS_SITE_ID=${GOOGLE_ANALYTICS_SITE_ID?Please set the GOOGLE_ANALYTICS_SITE_ID env var}
         - GOOGLE_ANALYTICS_USERNAME=${GOOGLE_ANALYTICS_USERNAME?Please set the GOOGLE_ANALYTICS_USERNAME env var}
         - GOOGLE_ANALYTICS_PASSWORD=${GOOGLE_ANALYTICS_PASSWORD?Please set the GOOGLE_ANALYTICS_PASSWORD env var}
@@ -59,7 +65,7 @@ services:
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
       - CKAN_DATAPUSHER_URL=http://datapusher:8800
-      - CKAN_SITE_URL=${CKAN_SITE_URL}
+      - CKAN_SITE_URL=${CKAN_SITE_URL?Please set the CKAN_SITE_URL env var}
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
@@ -91,7 +97,7 @@ services:
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
       - CKAN_DATAPUSHER_URL=http://datapusher:8800
-      - CKAN_SITE_URL=${CKAN_SITE_URL}
+      - CKAN_SITE_URL=${CKAN_SITE_URL?Please set the CKAN_SITE_URL env var}
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
@@ -128,7 +134,7 @@ services:
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
       - CKAN_DATAPUSHER_URL=http://datapusher:8800
-      - CKAN_SITE_URL=${CKAN_SITE_URL}
+      - CKAN_SITE_URL=${CKAN_SITE_URL?Please set the CKAN_SITE_URL env var}
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
@@ -188,3 +194,13 @@ services:
     container_name: mdf-prod-redis
     image: redis:latest
     restart: always
+
+  letsencrypt:
+    container_name: mdf-prod-letsencrypt
+    build:
+      context: .
+      dockerfile: compose/letsencrypt/Dockerfile
+    volumes:
+      - letsencrypt_certs:/etc/letsencrypt
+      - letsencrypt_www:/var/www/letsencrypt
+    command: /bin/true
