@@ -64,7 +64,9 @@ Until we have set up a proper container registry we deploy by creating an ssh tu
 
 Note: You will need to set up ssh keys and get them added to the container service either on the Azure portal or ask a developer with access to help you.
 
-To deploy:
+-----------
+
+**To deploy:**
 
 1 Set the Google Analytics environment variables in your shell (request the details from a developer)
     * `export GOOGLE_ANALYTICS_SITE_ID=???`
@@ -76,3 +78,24 @@ To deploy:
 5. Create the tunnel `ssh dockeruser@51.141.98.150 -p 2200 -L 22375:127.0.0.1:2375`
 6. Point docker to the remote service `export DOCKER_HOST=":22375"`
 7. Bring the containers up `docker-compose -f production.yml up -d`
+
+-----------
+
+**SSL Certs**
+
+We currently use [Letsencrypt](https://letsencrypt.org/) as our certificate authority.
+
+Certificates can be created and updated via the letsencrypt docker container. The container only runs as needed when a certificate need to be renewed. 
+
+You can use the commands below with the azure deploy tunnel activated to manage certs. 
+
+
+Create certificates
+```
+docker-compose -f production.yml run --rm letsencrypt letsencrypt certonly --webroot --email <your email address> --agree-tos -w /var/www/letsencrypt -d defra-making-data-findable.ukwest.cloudapp.azure.com
+```
+
+Renew certificates
+```
+docker-compose run --rm letsencrypt letsencrypt renew
+```
