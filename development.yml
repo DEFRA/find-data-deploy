@@ -39,6 +39,8 @@ services:
     volumes:
       - ./compose/ckan/ckan-dev-entrypoint.sh:/ckan-entrypoint.sh
       - ./compose/ckan/config/development.ini:/etc/ckan/production.ini
+      - ./compose/ckan/config/test.ini:/etc/ckan/test.ini
+      - ./compose/ckan/init_tests.sh:/init_tests.sh
       - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
       - ./ckan-extensions/ckanext-defrareports:/usr/lib/ckan/venv/src/ckanext-defrareports
       - ./compose/ckan/config/analytics-auth.json:/analytics-auth.json
