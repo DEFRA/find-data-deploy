@@ -122,7 +122,7 @@ schema. In this case the version should be set to the next CKAN version number.
 
     <!-- catchall field, containing all other searchable text fields (implemented
          via copyField further on in this schema  -->
-    <field name="text" type="text" indexed="true" stored="false" multiValued="true"/>
+    <field name="text" type="text" indexed="true" stored="false" multiValued="true" termVectors="true"/>
     <field name="urls" type="text" indexed="true" stored="false" multiValued="true"/>
 
     <field name="depends_on" type="text" indexed="true" stored="false" multiValued="true"/>
