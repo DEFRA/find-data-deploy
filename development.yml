@@ -10,9 +10,9 @@ services:
     container_name: mdf-ckan
     build:
       context: .
-      dockerfile: compose/ckan/Dockerfile
+      dockerfile: compose/ckan/Dockerfile-dev
       args:
-        - CKAN_SITE_URL=${CKAN_SITE_URL}
+        - CKAN_SITE_URL=http://ckan
         - GOOGLE_ANALYTICS_SITE_ID=""
         - GOOGLE_ANALYTICS_USERNAME=""
     links:
@@ -31,21 +31,17 @@ services:
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
       - CKAN_DATAPUSHER_URL=http://datapusher:8800
-      - CKAN_SITE_URL=${CKAN_SITE_URL}
+      - CKAN_SITE_URL=http://ckan
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
-      - CKAN_INI=/etc/ckan/production.ini
+      - CKAN_INI=/etc/ckan/development.ini
+      - CKAN_DB_NAME=ckan_default
     volumes:
-      - ./compose/ckan/ckan-dev-entrypoint.sh:/ckan-entrypoint.sh
-      - ./compose/ckan/config/development.ini:/etc/ckan/production.ini
-      - ./compose/ckan/config/test.ini:/etc/ckan/test.ini
-      - ./compose/ckan/init_tests.sh:/init_tests.sh
       - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
       - ./ckan-extensions/ckanext-defrareports:/usr/lib/ckan/venv/src/ckanext-defrareports
-      - ./compose/ckan/config/analytics-auth.json:/analytics-auth.json
     command:
-      /usr/lib/ckan/venv/bin/paster serve /etc/ckan/production.ini --reload
+      /usr/lib/ckan/venv/bin/paster serve /etc/ckan/development.ini --reload
 
   datapusher:
     container_name: mdf-datapusher
@@ -92,8 +88,6 @@ services:
       - redis
       - mailhog
     volumes:
-      - ./compose/supervisor/config:/etc/supervisor/conf.d
-      - ./compose/ckan/config/development.ini:/etc/ckan/production.ini
       - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
       - ./ckan-extensions/ckanext-defrareports:/usr/lib/ckan/venv/src/ckanext-defrareports
     environment:
@@ -103,11 +97,12 @@ services:
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
       - CKAN_DATAPUSHER_URL=http://datapusher:8800
-      - CKAN_SITE_URL=${CKAN_SITE_URL}
+      - CKAN_SITE_URL=http://ckan
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
-      - CKAN_INI=/etc/ckan/production.ini
+      - CKAN_INI=/etc/ckan/development.ini
+      - CKAN_DB_NAME=ckan_default
     entrypoint: ""
     user: root
     command:
@@ -127,9 +122,6 @@ services:
       - redis
       - mailhog
     volumes:
-      - ./compose/ckan/ckan-dev-entrypoint.sh:/ckan-entrypoint.sh
-      - ./compose/ckan/config/development.ini:/etc/ckan/production.ini
-      - ./compose/cron/config/cronjobs:/etc/cron.d/cronjobs
       - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
       - ./ckan-extensions/ckanext-defrareports:/usr/lib/ckan/venv/src/ckanext-defrareports
     environment:
@@ -139,11 +131,12 @@ services:
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
       - CKAN_DATAPUSHER_URL=http://datapusher:8800
-      - CKAN_SITE_URL=${CKAN_SITE_URL}
+      - CKAN_SITE_URL=http://ckan
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
-      - CKAN_INI=/etc/ckan/production.ini
+      - CKAN_INI=/etc/ckan/development.ini
+      - CKAN_DB_NAME=ckan_default
     entrypoint: ""
     user: root
     command:
