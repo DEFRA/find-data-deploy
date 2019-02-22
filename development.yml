@@ -76,6 +76,8 @@ services:
   redis:
     container_name: mdf-redis
     image: redis:latest
+    ports:
+      - "6379:6379"
 
   supervisor:
     container_name: mdf-supervisor
