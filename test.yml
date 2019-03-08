@@ -6,8 +6,9 @@ volumes:
   test_pg_data:
 
 services:
-  ckan:
+  test_ckan:
     container_name: mdf-test-ckan
+    hostname: ckan
     build:
       context: .
       dockerfile: compose/ckan/Dockerfile-dev
@@ -16,18 +17,16 @@ services:
         - GOOGLE_ANALYTICS_SITE_ID=""
         - GOOGLE_ANALYTICS_USERNAME=""
     links:
-      - db
-      - solr
-      - redis
-      - location
+      - test_db
+      - test_solr
+      - test_redis
+      - test_location
     ports:
       - "0.0.0.0:${CKAN_PORT}:5000"
     environment:
-      - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:ckan@db/ckan_test
-#      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan_default:ckan@db/datastore_test
-#      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:ckan@db/datastore_test
-      - CKAN_SOLR_URL=http://solr:8983/solr/ckan
-      - CKAN_REDIS_URL=redis://redis:6379/1
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:ckan@test_db/ckan_test
+      - CKAN_SOLR_URL=http://test_solr:8983/solr/ckan
+      - CKAN_REDIS_URL=redis://test_redis:6379/1
       - CKAN_DATAPUSHER_URL=http://datapusher:8800
       - CKAN_SITE_URL=http://localhost:5000
       - CKAN_MAX_UPLOAD_SIZE_MB=100
@@ -42,14 +41,9 @@ services:
     command:
       /usr/lib/ckan/venv/bin/paster serve /etc/ckan/test.ini --reload
 
-  datapusher:
-    container_name: mdf-test-datapusher
-    image: clementmouchet/datapusher
-    ports:
-      - "8800:8800"
-
-  db:
+  test_db:
     container_name: mdf-test-db
+    hostname: db
     build:
       context: .
       dockerfile: compose/postgresql/Dockerfile
@@ -64,20 +58,23 @@ services:
     ports:
       - "5433:5432"
 
-  solr:
+  test_solr:
     container_name: mdf-test-solr
+    hostname: solr
     build:
       context: .
       dockerfile: compose/solr/Dockerfile
     ports:
       - "8983:8983"
 
-  redis:
+  test_redis:
     container_name: mdf-test-redis
+    hostname: redis
     image: redis:latest
 
-  location:
+  test_location:
     container_name: mdf-test-location
+    hostname: location
     build:
       context: .
       dockerfile: compose/location/Dockerfile-dev
