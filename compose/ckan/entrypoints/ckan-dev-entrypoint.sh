@@ -35,6 +35,8 @@ set_environment () {
   export CKAN_SMTP_MAIL_FROM=${CKAN_SMTP_MAIL_FROM}
   export CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
   export PGPASSWORD=ckan
+  export CKAN_DB_NAME=${CKAN_DB_NAME}
+  export CKAN_INI=${CKAN_INI}
 }
 
 write_config () {
@@ -46,7 +48,6 @@ if [ ! -e "$CONFIG" ]; then
   write_config
 fi
 
-# Get or create CKAN_SQLALCHEMY_URL
 if [ -z "$CKAN_SQLALCHEMY_URL" ]; then
   abort "ERROR: no CKAN_SQLALCHEMY_URL specified in docker-compose.yml"
 fi
@@ -63,27 +64,35 @@ if [ -z "$CKAN_DATAPUSHER_URL" ]; then
     abort "ERROR: no CKAN_DATAPUSHER_URL specified in docker-compose.yml"
 fi
 
+if [ -z "$CKAN_DB_NAME" ]; then
+  abort "ERROR: no CKAN_DB_NAME specified in docker-compose.yml"
+fi
+
+if [ -z "$CKAN_INI" ]; then
+  abort "ERROR: no CKAN_INI specified in docker-compose.yml"
+fi
+
 set_environment
 
 if [ ! -f /tmp/.initialized ]; then
 
     # Initialise the database
-    ckan-paster --plugin=ckan db init -c "/etc/ckan/production.ini"
+    ckan-paster --plugin=ckan db init -c ${CKAN_INI}
 
     # Initialise the reports
     ckan-paster --plugin=ckanext-report report initdb
 
     # Initialise the harvesting database
-    ckan-paster --plugin=ckanext-harvest harvester initdb -c /etc/ckan/production.ini
+    ckan-paster --plugin=ckanext-harvest harvester initdb -c ${CKAN_INI}
 
     # Change postgis permissions (1/2)
-    psql -h db -d ckan_default -U ckan_default -c 'ALTER VIEW geometry_columns OWNER TO ckan_default;'
+    psql -h db -d ${CKAN_DB_NAME} -U ckan_default -c 'ALTER VIEW geometry_columns OWNER TO ckan_default;'
 
     # Change postgis permissions (2/2)
-    psql -h db -d ckan_default -U ckan_default -c 'ALTER TABLE spatial_ref_sys OWNER TO ckan_default;'
+    psql -h db -d ${CKAN_DB_NAME} -U ckan_default -c 'ALTER TABLE spatial_ref_sys OWNER TO ckan_default;'
 
     # Initialise the spatial database
-    ckan-paster --plugin=ckanext-spatial spatial initdb 4326 -c /etc/ckan/production.ini
+    ckan-paster --plugin=ckanext-spatial spatial initdb 4326 -c ${CKAN_INI}
 
     # Initialise the analytics db
     ckan-paster --plugin=ckanext-ga-report initdb -c /etc/ckan/production.ini
