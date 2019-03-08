@@ -27,3 +27,4 @@ psql -h db -d ckan_test -U ckan_default -c 'ALTER TABLE spatial_ref_sys OWNER TO
 # Initialise the spatial database
 /usr/local/bin/ckan-paster --plugin=ckanext-spatial spatial initdb 4326 -c /etc/ckan/test.ini
 /usr/local/bin/ckan-paster --plugin=ckanext-harvest harvester initdb -c /etc/ckan/test.ini
+/usr/local/bin/ckan-paster --plugin=ckanext-ga-report initdb -c /etc/ckan/test.ini
