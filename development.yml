@@ -150,7 +150,6 @@ services:
       context: .
       dockerfile: compose/location/Dockerfile-dev
     volumes:
-      - ./services/golang/location-lookup:/go/src/location-lookup
       - ./compose/location/data/merged_results.csv:/merged_results.csv
     ports:
       - "5001:5000"
