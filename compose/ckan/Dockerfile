@@ -108,8 +108,8 @@ RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-defrare
 RUN /usr/lib/ckan/venv/bin/pip install -e /usr/lib/ckan/venv/src/ckanext-defrareports/
 
 # Copy init file
-COPY ./compose/ckan/ckan-production-entrypoint.sh /ckan-entrypoint.sh
-RUN chmod a+x /ckan-entrypoint.sh
+COPY ./compose/ckan/entrypoints/* /
+RUN chmod a+x /ckan-*-entrypoint.sh
 
 # Copy the supervisor config
 RUN mkdir -p /etc/supervisor/conf.d
@@ -129,8 +129,7 @@ RUN crontab /etc/cron.d/cronjobs
 # Copy Analytics Auth
 COPY ./compose/ckan/config/analytics-auth.json /analytics-auth.json
 
-
-ENTRYPOINT ["/ckan-entrypoint.sh"]
+ENTRYPOINT ["/ckan-production-entrypoint.sh"]
 
 USER ckan
 EXPOSE 5000

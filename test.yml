@@ -1,0 +1,91 @@
+# docker-compose build && docker-compose up -d
+# If "docker-compose logs ckan" shows DB not ready, run "docker-compose restart ckan" a few times.
+version: "3"
+
+volumes:
+  test_pg_data:
+
+services:
+  ckan:
+    container_name: mdf-test-ckan
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile-dev
+      args:
+        - CKAN_SITE_URL=http://localhost:5000
+        - GOOGLE_ANALYTICS_SITE_ID=""
+        - GOOGLE_ANALYTICS_USERNAME=""
+    links:
+      - db
+      - solr
+      - redis
+      - location
+    ports:
+      - "0.0.0.0:${CKAN_PORT}:5000"
+    environment:
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:ckan@db/ckan_test
+#      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan_default:ckan@db/datastore_test
+#      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:ckan@db/datastore_test
+      - CKAN_SOLR_URL=http://solr:8983/solr/ckan
+      - CKAN_REDIS_URL=redis://redis:6379/1
+      - CKAN_DATAPUSHER_URL=http://datapusher:8800
+      - CKAN_SITE_URL=http://localhost:5000
+      - CKAN_MAX_UPLOAD_SIZE_MB=100
+      - POSTGRES_PASSWORD=ckan
+      - DS_RO_PASS=ckan
+      - CKAN_INI=/etc/ckan/test.ini
+      - CKAN_DB_NAME=ckan_test
+    volumes:
+      - ./ckan-extensions/ckanext-defra/test.ini:/etc/ckan/test.ini
+      - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
+      - ./ckan-extensions/ckanext-defrareports:/usr/lib/ckan/venv/src/ckanext-defrareports
+    command:
+      /usr/lib/ckan/venv/bin/paster serve /etc/ckan/test.ini --reload
+
+  datapusher:
+    container_name: mdf-test-datapusher
+    image: clementmouchet/datapusher
+    ports:
+      - "8800:8800"
+
+  db:
+    container_name: mdf-test-db
+    build:
+      context: .
+      dockerfile: compose/postgresql/Dockerfile
+      args:
+        - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    environment:
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - test_pg_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  solr:
+    container_name: mdf-test-solr
+    build:
+      context: .
+      dockerfile: compose/solr/Dockerfile
+    ports:
+      - "8983:8983"
+
+  redis:
+    container_name: mdf-test-redis
+    image: redis:latest
+
+  location:
+    container_name: mdf-test-location
+    build:
+      context: .
+      dockerfile: compose/location/Dockerfile-dev
+    volumes:
+      - ./services/golang/location-lookup:/go/src/location-lookup
+      - ./compose/location/data/merged_results.csv:/merged_results.csv
+    ports:
+      - "5001:5000"
+    environment:
+      - LOCATION_MERGE_FILE=/merged_results.csv
+    command: make --directory /go/src/location-lookup run
