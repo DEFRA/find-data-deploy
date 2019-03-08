@@ -49,13 +49,13 @@
     * Ensure roles exists in the db (pass: ckan) `psql -h localhost -d postgres -p 5433 -U ckan_default -c 'CREATE USER postgres SUPERUSER;'`
     * Run the sql (pass: ckan) ``psql -h localhost -p 5433 -U ckan_default < /tmp/ckan-backup-`date +%F`.sql`` 
     * Restart all containers `docker-compose -f development.yml up -d`
-    * You will also probably need to rebuild the solr search index `docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan search-index rebuild -o --config=/etc/ckan/production.ini`
+    * You will also probably need to rebuild the solr search index `docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan search-index rebuild -o --config=/etc/ckan/development.ini`
     
 6. Setup Datastore
-  * Set postgres permissions ``docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan datastore set-permissions -c /etc/ckan/production.ini | psql -h db -U ckan_default --set ON_ERROR_STOP=1``
-  * Add existing datasets to the datastore``docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan datapusher submit_all -c /etc/ckan/production.ini``  
+  * Set postgres permissions ``docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan datastore set-permissions -c /etc/ckan/development.ini | psql -h db -U ckan_default --set ON_ERROR_STOP=1``
+  * Add existing datasets to the datastore``docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan datapusher submit_all -c /etc/ckan/development.ini``  
 7. User
-    * Create a superuser account for yourself ``docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan sysadmin add <YOUR USERNAME> email=<YOUR EMAIL> name=<YOUR USERNAME> -c /etc/ckan/production.ini``
+    * Create a superuser account for yourself ``docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan sysadmin add <YOUR USERNAME> email=<YOUR EMAIL> name=<YOUR USERNAME> -c /etc/ckan/development.ini``
     
 
 ### Deploying to Azure
@@ -104,20 +104,19 @@ docker-compose run --rm letsencrypt letsencrypt renew
 
 Before you first run tests locally you will need to setup the test db
 ```.env
-docker-compose -f test.yml run --rm ckan /init_tests.sh
+docker-compose -f test.yml run --rm test_ckan /init_tests.sh
 ```
 
 Run tests for both the defra and defrareports plugin. This will spin up a new dev environment and run the tests.
 ```.env
-docker-compose -f test.yml run --rm ckan /usr/lib/ckan/venv/bin/nosetests --nologcapture --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defrareports/test.ini /usr/lib/ckan/venv/src/ckanext-defrareports/ckanext/defrareports/tests/ /usr/lib/ckan/venv/src/ckanext-defra/ckanext/defra/tests/
+docker-compose -f test.yml run --rm test_ckan /usr/lib/ckan/venv/bin/nosetests --nologcapture --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defrareports/test.ini /usr/lib/ckan/venv/src/ckanext-defrareports/ckanext/defrareports/tests/ /usr/lib/ckan/venv/src/ckanext-defra/ckanext/defra/tests/
 ```
 
 For quicker tests while developing you can drop into the ckan container and run the tests directly.
 ```.env
 
 # Connect to the ckan container
-docker-compose -f test.yml run --rm ckan 
-docker exec -it mdf-test-ckan /bin/bash
+docker-compose -f test.yml run --rm test_ckan /bin/bash
 
 # Run defra tests
 /usr/lib/ckan/venv/bin/nosetests --nologcapture --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defrareports/test.ini /usr/lib/ckan/venv/src/ckanext-defra/ckanext/defra/tests/
