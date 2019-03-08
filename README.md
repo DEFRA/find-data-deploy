@@ -109,18 +109,19 @@ docker-compose -f test.yml run --rm ckan /init_tests.sh
 
 Run tests for both the defra and defrareports plugin. This will spin up a new dev environment and run the tests.
 ```.env
-docker-compose -f test.yml run --rm ckan /usr/lib/ckan/venv/bin/nosetests --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defrareports/test.ini /usr/lib/ckan/venv/src/ckanext-defrareports/ckanext/defrareports/tests/ /usr/lib/ckan/venv/src/ckanext-defra/ckanext/defra/tests/
+docker-compose -f test.yml run --rm ckan /usr/lib/ckan/venv/bin/nosetests --nologcapture --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defrareports/test.ini /usr/lib/ckan/venv/src/ckanext-defrareports/ckanext/defrareports/tests/ /usr/lib/ckan/venv/src/ckanext-defra/ckanext/defra/tests/
 ```
 
 For quicker tests while developing you can drop into the ckan container and run the tests directly.
 ```.env
 
 # Connect to the ckan container
+docker-compose -f test.yml run --rm ckan 
 docker exec -it mdf-test-ckan /bin/bash
 
 # Run defra tests
-/usr/lib/ckan/venv/bin/nosetests --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defrareports/test.ini /usr/lib/ckan/venv/src/ckanext-defra/ckanext/defra/tests/
+/usr/lib/ckan/venv/bin/nosetests --nologcapture --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defrareports/test.ini /usr/lib/ckan/venv/src/ckanext-defra/ckanext/defra/tests/
 
 # Run defrareports tests
-/usr/lib/ckan/venv/bin/nosetests --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defrareports/test.ini /usr/lib/ckan/venv/src/ckanext-defrareports/ckanext/defrareports/tests/
+/usr/lib/ckan/venv/bin/nosetests --nologcapture --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defrareports/test.ini /usr/lib/ckan/venv/src/ckanext-defrareports/ckanext/defrareports/tests/
 ```
