@@ -9,6 +9,7 @@ services:
   test_ckan:
     container_name: mdf-test-ckan
     hostname: ckan
+    restart: "no"
     build:
       context: .
       dockerfile: compose/ckan/Dockerfile-dev
@@ -44,6 +45,7 @@ services:
   test_db:
     container_name: mdf-test-db
     hostname: db
+    restart: "no"
     build:
       context: .
       dockerfile: compose/postgresql/Dockerfile
@@ -61,6 +63,7 @@ services:
   test_solr:
     container_name: mdf-test-solr
     hostname: solr
+    restart: "no"
     build:
       context: .
       dockerfile: compose/solr/Dockerfile
@@ -70,11 +73,13 @@ services:
   test_redis:
     container_name: mdf-test-redis
     hostname: redis
+    restart: "no"
     image: redis:latest
 
   test_location:
     container_name: mdf-test-location
     hostname: location
+    restart: "no"
     build:
       context: .
       dockerfile: compose/location/Dockerfile-dev
