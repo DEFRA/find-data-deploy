@@ -1,0 +1,208 @@
+version: "3"
+
+volumes:
+  pg_data_staging:
+  ckan_storage_staging:
+  letsencrypt_certs_staging:
+  letsencrypt_www_staging:
+
+services:
+
+  nginx_staging:
+    container_name: mdf-staging-nginx
+    hostname: nginx
+    build:
+      context: .
+      dockerfile: ./compose/nginx/Dockerfile-staging
+    depends_on:
+      - ckan_staging
+      - location_staging
+      - datapusher_staging
+    links:
+      - ckan_staging
+      - location_staging
+      - datapusher_staging
+    restart: always
+    volumes:
+      - letsencrypt_certs_staging:/etc/letsencrypt
+      - letsencrypt_www_staging:/var/www/letsencrypt
+    ports:
+      - "80:80"
+      - "443:443"
+    expose:
+      - "80"
+      - "443"
+
+  ckan_staging:
+    container_name: mdf-staging-ckan
+    hostname: ckan
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile-staging
+      args:
+        - CKAN_SITE_URL=${CKAN_SITE_URL?Please set the CKAN_SITE_URL env var}
+        - SENTRY_DSN=${SENTRY_DSN?Please set the SENTRY_DSN env var}
+        - SENDGRID_PASSWORD=${SENDGRID_PASSWORD?Please set the SENDGRID_PASSWORD env var}
+    volumes:
+      - ckan_storage_staging:/var/lib/ckan
+    restart: always
+    links:
+      - db_staging
+      - solr_staging
+      - redis_staging
+      - datapusher_staging
+    expose:
+      - "5000"
+    ports:
+      - "5000:5000"
+    environment:
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db_staging/ckan_default
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db_staging/datastore
+      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db_staging/datastore
+      - CKAN_SOLR_URL=http://solr_staging:8983/solr/ckan
+      - CKAN_REDIS_URL=redis://redis_staging:6379/1
+      - CKAN_DATAPUSHER_URL=http://datapusher:8800
+      - CKAN_SITE_URL=${CKAN_SITE_URL?Please set the CKAN_SITE_URL env var}
+      - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      - CKAN_INI=/etc/ckan/staging.ini
+    entrypoint: /ckan-staging-entrypoint.sh
+    command:
+      /usr/lib/ckan/venv/bin/paster serve /etc/ckan/staging.ini --reload
+
+  supervisor_staging:
+    container_name: mdf-staging-supervisor
+    hostname: supervisor
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile-staging
+      args:
+        - SENTRY_DSN=${SENTRY_DSN?Please set the SENTRY_DSN env var}
+        - SENDGRID_PASSWORD=${SENDGRID_PASSWORD?Please set the SENDGRID_PASSWORD env var}
+    volumes:
+      - ckan_storage_staging:/var/lib/ckan
+    restart: always
+    links:
+      - db_staging
+      - solr_staging
+      - redis_staging
+      - location_staging
+    environment:
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db_staging/ckan_default
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db_staging/datastore
+      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db_staging/datastore
+      - CKAN_SOLR_URL=http://solr_staging:8983/solr/ckan
+      - CKAN_REDIS_URL=redis://redis_staging:6379/1
+      - CKAN_DATAPUSHER_URL=http://datapusher:8800
+      - CKAN_SITE_URL=${CKAN_SITE_URL?Please set the CKAN_SITE_URL env var}
+      - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      - CKAN_INI=/etc/ckan/staging.ini
+    entrypoint: ""
+    user: root
+    command:
+      /usr/bin/supervisord
+
+  cron_staging:
+    container_name: mdf-staging-cron
+    hostname: cron
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile-staging
+      args:
+        - GOOGLE_ANALYTICS_SITE_ID=${GOOGLE_ANALYTICS_SITE_ID?Please set the GOOGLE_ANALYTICS_SITE_ID env var}
+        - GOOGLE_ANALYTICS_USERNAME=${GOOGLE_ANALYTICS_USERNAME?Please set the GOOGLE_ANALYTICS_USERNAME env var}
+        - GOOGLE_ANALYTICS_PASSWORD=${GOOGLE_ANALYTICS_PASSWORD?Please set the GOOGLE_ANALYTICS_PASSWORD env var}
+        - SENTRY_DSN=${SENTRY_DSN?Please set the SENTRY_DSN env var}
+        - SENDGRID_PASSWORD=${SENDGRID_PASSWORD?Please set the SENDGRID_PASSWORD env var}
+    volumes:
+      - ckan_storage_staging:/var/lib/ckan
+    restart: always
+    links:
+      - db_staging
+      - solr_staging
+      - redis_staging
+      - location_staging
+    environment:
+      - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db_staging/ckan_default
+      - CKAN_DATASTORE_WRITE_URL=postgresql://ckan_default:${POSTGRES_PASSWORD}@db_staging/datastore
+      - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db_staging/datastore
+      - CKAN_SOLR_URL=http://solr_staging:8983/solr/ckan
+      - CKAN_REDIS_URL=redis://redis_staging:6379/1
+      - CKAN_DATAPUSHER_URL=http://datapusher:8800
+      - CKAN_SITE_URL=${CKAN_SITE_URL?Please set the CKAN_SITE_URL env var}
+      - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      - CKAN_INI=/etc/ckan/staging.ini
+    entrypoint: ""
+    user: root
+    command:
+      cron -f
+
+  location_staging:
+    container_name: mdf-staging-location
+    hostname: location
+    restart: always
+    build:
+      context: .
+      dockerfile: ./compose/location/Dockerfile
+    environment:
+      - LOCATION_MERGE_FILE=/merged_results.csv
+    ports:
+      - "5001:5000"
+
+  db_staging:
+    container_name: mdf-staging-db
+    hostname: db
+    build:
+      context: .
+      dockerfile: compose/postgresql/Dockerfile
+      args:
+        - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    restart: always
+    environment:
+      - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - pg_data_staging:/var/lib/postgresql/data
+    expose:
+      - "5432"
+
+  datapusher_staging:
+    container_name: mdf-staging-datapusher
+    image: clementmouchet/datapusher
+    hostname: datapusher
+    restart: always
+    expose:
+      - "8800"
+
+  solr_staging:
+    container_name: mdf-staging-solr
+    hostname: solr
+    build:
+      context: .
+      dockerfile: compose/solr/Dockerfile
+    restart: always
+    expose:
+      - "8983"
+
+  redis_staging:
+    container_name: mdf-staging-redis
+    image: redis:latest
+    hostname: redis
+    restart: always
+
+  letsencrypt_staging:
+    container_name: mdf-staging-letsencrypt
+    hostname: letsencrypt
+    build:
+      context: .
+      dockerfile: compose/letsencrypt/Dockerfile-staging
+    volumes:
+      - letsencrypt_certs_staging:/etc/letsencrypt
+      - letsencrypt_www_staging:/var/www/letsencrypt
+    command: /bin/true
