@@ -161,3 +161,15 @@ services:
     image: mailhog/mailhog:v1.0.0
     ports:
       - "8025:8025"
+
+  # Load testing
+  # See: https://medium.com/locust-io-experiments/locust-io-experiments-running-in-docker-cae3c7f9386e
+  locust:
+    container_name: mdf-locust
+    image: grubykarol/locust:latest
+    environment:
+      - ATTACKED_HOST=https://defra:finddata@defra-making-data-findable.ukwest.cloudapp.azure.com
+    volumes:
+      - ./compose/locust/scripts:/locust
+    ports:
+      - "8089:8089"
