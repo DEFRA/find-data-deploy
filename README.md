@@ -124,3 +124,22 @@ docker-compose -f test.yml run --rm test_ckan /bin/bash
 # Run defrareports tests
 /usr/lib/ckan/venv/bin/nosetests --nologcapture --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defrareports/test.ini /usr/lib/ckan/venv/src/ckanext-defrareports/ckanext/defrareports/tests/
 ```
+
+### Feature Testing
+We use behave and selenium for feature testing. Before getting started you will need to ensure you have an admin user
+
+```
+docker exec -it mdf-ckan ckan-paster --plugin=ckan sysadmin add admin --config=/etc/ckan/development.ini
+> Email address: admin@finddata
+> Password: correct horse battery staple
+```
+
+You will also need to install the test requirements
+```
+pip install -r requirements/test.txt
+```
+
+Now, from the project directory you can run the tests
+```
+behave
+```

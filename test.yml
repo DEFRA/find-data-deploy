@@ -9,7 +9,7 @@ services:
   test_ckan:
     container_name: mdf-test-ckan
     hostname: ckan
-    restart: "no"
+    restart: "no"`
     build:
       context: .
       dockerfile: compose/ckan/Dockerfile-dev

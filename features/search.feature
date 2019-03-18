@@ -16,7 +16,7 @@ Feature: Search
 
   Scenario: User searches using Lucene query syntax
     When a user visits the Data page
-    And they search for "organization:ne AND title:agri*"
+    And they search for "organization:ne AND title:agri"
     Then they see a list of search results
     And the search results are ordered by relevance
     And the search results are published by "Natural England"

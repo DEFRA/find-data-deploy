@@ -7,4 +7,4 @@ Feature: Home page
   Scenario: Data page results are ordered correctly
     When a user visits the Data page
     Then they see a list of datasets
-    And the datasets are ordered by last modified
+    And the search results are ordered by relevance

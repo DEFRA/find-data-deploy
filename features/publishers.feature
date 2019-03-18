@@ -24,6 +24,6 @@ Feature: Publishers
 
   Scenario: See the datasets a publisher has published
     When a user visits the Publishers page
-    And they select a publisher
+    And they select a publisher from the results
     Then they see a list of search results
     And the search results are published by the publisher
