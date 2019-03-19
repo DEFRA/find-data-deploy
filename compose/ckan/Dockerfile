@@ -123,7 +123,7 @@ RUN touch /var/log/cron.log
 RUN mkdir /var/log/ckan/
 
 # Set up cron
-COPY ./compose/cron/config/cronjobs /etc/cron.d/cronjobs
+COPY ./compose/cron/config/cronjobs-prod /etc/cron.d/cronjobs
 RUN crontab /etc/cron.d/cronjobs
 
 # Copy Analytics Auth
