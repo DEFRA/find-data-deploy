@@ -95,7 +95,10 @@ if [ ! -f /tmp/.initialized ]; then
     ckan-paster --plugin=ckanext-spatial spatial initdb 4326 -c ${CKAN_INI}
 
     # Initialise the analytics db
-    ckan-paster --plugin=ckanext-ga-report initdb -c /etc/ckan/production.ini
+    ckan-paster --plugin=ckanext-ga-report initdb -c ${CKAN_INI}
+
+    # Import publishers & their harvesters
+    ckan-paster --plugin=ckanext-defra import_publishers -c ${CKAN_INI}
 
     touch /tmp/.initialized
 fi
