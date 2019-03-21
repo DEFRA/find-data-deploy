@@ -113,7 +113,7 @@ RUN chmod a+x /ckan-*-entrypoint.sh
 
 # Copy the supervisor config
 RUN mkdir -p /etc/supervisor/conf.d
-COPY ./compose/supervisor/config /etc/supervisor/conf.d
+COPY ./compose/supervisor/config/production /etc/supervisor/conf.d
 
 # Copy uwsgi config
 COPY ./compose/ckan/config/uwsgi.conf /uwsgi.conf
