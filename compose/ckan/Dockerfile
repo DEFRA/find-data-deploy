@@ -129,6 +129,9 @@ RUN crontab /etc/cron.d/cronjobs
 # Copy Analytics Auth
 COPY ./compose/ckan/config/analytics-auth.json /analytics-auth.json
 
+# Copy required xloader sql
+COPY ./compose/ckan/config/full_text_function.sql /full_text_function.sql
+
 ENTRYPOINT ["/ckan-production-entrypoint.sh"]
 
 USER ckan
