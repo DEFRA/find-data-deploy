@@ -105,7 +105,7 @@ RUN touch /var/log/cron.log
 RUN mkdir /var/log/ckan/
 
 # Set up cron
-COPY ./compose/cron/config/cronjobs /etc/cron.d/cronjobs
+COPY ./compose/cron/config/cronjobs-staging /etc/cron.d/cronjobs
 RUN crontab /etc/cron.d/cronjobs
 
 # Copy Analytics Auth
@@ -113,6 +113,9 @@ COPY ./compose/ckan/config/analytics-auth.json /analytics-auth.json
 
 # Copy Analytics Auth
 COPY ./compose/ckan/config/analytics-auth.json /analytics-auth.json
+
+# Copy required xloader sql
+COPY ./compose/ckan/config/full_text_function.sql /full_text_function.sql
 
 USER ckan
 EXPOSE 5000

@@ -17,11 +17,9 @@ services:
     depends_on:
       - ckan_staging
       - location_staging
-      - datapusher_staging
     links:
       - ckan_staging
       - location_staging
-      - datapusher_staging
     restart: always
     volumes:
       - letsencrypt_certs_staging:/etc/letsencrypt
@@ -50,7 +48,6 @@ services:
       - db_staging
       - solr_staging
       - redis_staging
-      - datapusher_staging
     expose:
       - "5000"
     ports:
@@ -61,7 +58,6 @@ services:
       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db_staging/datastore
       - CKAN_SOLR_URL=http://solr_staging:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis_staging:6379/1
-      - CKAN_DATAPUSHER_URL=http://datapusher:8800
       - CKAN_SITE_URL=${CKAN_SITE_URL?Please set the CKAN_SITE_URL env var}
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -94,7 +90,6 @@ services:
       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db_staging/datastore
       - CKAN_SOLR_URL=http://solr_staging:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis_staging:6379/1
-      - CKAN_DATAPUSHER_URL=http://datapusher:8800
       - CKAN_SITE_URL=${CKAN_SITE_URL?Please set the CKAN_SITE_URL env var}
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -131,7 +126,6 @@ services:
       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db_staging/datastore
       - CKAN_SOLR_URL=http://solr_staging:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis_staging:6379/1
-      - CKAN_DATAPUSHER_URL=http://datapusher:8800
       - CKAN_SITE_URL=${CKAN_SITE_URL?Please set the CKAN_SITE_URL env var}
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -171,14 +165,6 @@ services:
       - pg_data_staging:/var/lib/postgresql/data
     expose:
       - "5432"
-
-  datapusher_staging:
-    container_name: mdf-staging-datapusher
-    image: clementmouchet/datapusher
-    hostname: datapusher
-    restart: always
-    expose:
-      - "8800"
 
   solr_staging:
     container_name: mdf-staging-solr

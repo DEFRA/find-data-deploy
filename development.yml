@@ -1,5 +1,3 @@
-# docker-compose build && docker-compose up -d
-# If "docker-compose logs ckan" shows DB not ready, run "docker-compose restart ckan" a few times.
 version: "3"
 
 volumes:
@@ -20,7 +18,6 @@ services:
       - solr
       - redis
       - mailhog
-      - datapusher
       - location
     ports:
       - "0.0.0.0:${CKAN_PORT}:5000"
@@ -30,7 +27,6 @@ services:
       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
-      - CKAN_DATAPUSHER_URL=http://datapusher:8800
       - CKAN_SITE_URL=http://ckan
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -42,12 +38,6 @@ services:
       - ./ckan-extensions/ckanext-defrareports:/usr/lib/ckan/venv/src/ckanext-defrareports
     command:
       /usr/lib/ckan/venv/bin/paster serve /etc/ckan/development.ini --reload
-
-  datapusher:
-    container_name: mdf-datapusher
-    image: clementmouchet/datapusher
-    ports:
-      - "8800:8800"
 
   db:
     container_name: mdf-db
@@ -98,7 +88,6 @@ services:
       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
-      - CKAN_DATAPUSHER_URL=http://datapusher:8800
       - CKAN_SITE_URL=http://ckan
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -132,7 +121,6 @@ services:
       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
-      - CKAN_DATAPUSHER_URL=http://datapusher:8800
       - CKAN_SITE_URL=http://ckan
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}

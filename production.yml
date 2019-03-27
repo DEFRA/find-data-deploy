@@ -17,11 +17,9 @@ services:
     depends_on:
       - ckan
       - location
-      - datapusher
     links:
       - ckan
       - location
-      - datapusher
     restart: always
     volumes:
       - letsencrypt_certs:/etc/letsencrypt
@@ -53,7 +51,6 @@ services:
       - db
       - solr
       - redis
-      - datapusher
     expose:
       - "5000"
     ports:
@@ -64,7 +61,6 @@ services:
       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
-      - CKAN_DATAPUSHER_URL=http://datapusher:8800
       - CKAN_SITE_URL=${CKAN_SITE_URL?Please set the CKAN_SITE_URL env var}
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -96,7 +92,6 @@ services:
       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
-      - CKAN_DATAPUSHER_URL=http://datapusher:8800
       - CKAN_SITE_URL=${CKAN_SITE_URL?Please set the CKAN_SITE_URL env var}
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -133,7 +128,6 @@ services:
       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
       - CKAN_REDIS_URL=redis://redis:6379/1
-      - CKAN_DATAPUSHER_URL=http://datapusher:8800
       - CKAN_SITE_URL=${CKAN_SITE_URL?Please set the CKAN_SITE_URL env var}
       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -172,13 +166,6 @@ services:
       - pg_data:/var/lib/postgresql/data
     expose:
       - "5432"
-
-  datapusher:
-    container_name: mdf-prod-datapusher
-    image: clementmouchet/datapusher
-    restart: always
-    expose:
-      - "8800"
 
   solr:
     container_name: mdf-prod-solr
