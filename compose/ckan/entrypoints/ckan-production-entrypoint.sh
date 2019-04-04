@@ -69,6 +69,9 @@ if [ ! -f /tmp/.initialized ]; then
     # Initialise the harvesting database
     ckan-paster --plugin=ckanext-harvest harvester initdb -c /etc/ckan/production.ini
 
+    # Set datastore permissions
+    ckan-paster --plugin=ckan datastore set-permissions -c /etc/ckan/production.ini | psql -h db -d datastore -U ckan_default
+
     # Change postgis permissions (1/2)
     psql -h db -d ckan_default -U ckan_default -c 'ALTER VIEW geometry_columns OWNER TO ckan_default;'
 
@@ -80,9 +83,6 @@ if [ ! -f /tmp/.initialized ]; then
 
     # Initialise the analytics db
     ckan-paster --plugin=ckanext-ga-report initdb -c /etc/ckan/production.ini
-
-    # Initialise the xloader db
-    psql -h db -d xloader_jobs -U datastore < /full_text_function.sql
 
     touch /tmp/.initialized
 fi

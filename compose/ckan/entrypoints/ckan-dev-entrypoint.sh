@@ -78,6 +78,9 @@ if [ ! -f /tmp/.initialized ]; then
     # Initialise the harvesting database
     ckan-paster --plugin=ckanext-harvest harvester initdb -c ${CKAN_INI}
 
+    # Set datastore permissions
+    ckan-paster --plugin=ckan datastore set-permissions -c /etc/ckan/development.ini | psql -h db -d datastore -U ckan_default
+
     # Change postgis permissions (1/2)
     psql -h db -d ${CKAN_DB_NAME} -U ckan_default -c 'ALTER VIEW geometry_columns OWNER TO ckan_default;'
 
@@ -92,9 +95,6 @@ if [ ! -f /tmp/.initialized ]; then
 
     # Import publishers & their harvesters
     ckan-paster --plugin=ckanext-defra import_publishers -c ${CKAN_INI}
-
-    # Initialise the xloader db
-    psql -h db -d datastore -U ckan_default < /full_text_function.sql
 
     touch /tmp/.initialized
 fi
