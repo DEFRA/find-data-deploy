@@ -1,0 +1,125 @@
+version: "3"
+
+volumes:
+  pg_data:
+
+services:
+  ckan:
+    container_name: mdf-ckan
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile-dev
+    env_file:
+      - .envs/dev.env
+    links:
+      - db
+      - solr
+      - redis
+      - mailhog
+      - location
+    ports:
+      - "0.0.0.0:80:5000"
+    volumes:
+      - ./compose/ckan/config/development.ini:/etc/ckan/development.ini
+      - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
+      - ./ckan-extensions/ckanext-defrareports:/usr/lib/ckan/venv/src/ckanext-defrareports
+    command:
+      /usr/lib/ckan/venv/bin/paster serve /etc/ckan/development.ini --reload
+
+  db:
+    container_name: mdf-db
+    build:
+      context: .
+      dockerfile: compose/postgresql/Dockerfile
+    env_file:
+      - .envs/dev.env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  solr:
+    container_name: mdf-solr
+    build:
+      context: .
+      dockerfile: compose/solr/Dockerfile
+    ports:
+      - "8983:8983"
+
+  redis:
+    container_name: mdf-redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  supervisor:
+    container_name: mdf-supervisor
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile-dev
+    env_file:
+      - .envs/dev.env
+    links:
+      - db
+      - solr
+      - redis
+      - mailhog
+    volumes:
+      - ./compose/ckan/config/development.ini:/etc/ckan/development.ini
+      - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
+      - ./ckan-extensions/ckanext-defrareports:/usr/lib/ckan/venv/src/ckanext-defrareports
+    entrypoint: ""
+    user: root
+    command:
+      /usr/bin/supervisord
+
+  cron:
+    container_name: mdf-cron
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile-dev
+    env_file:
+      - .envs/dev.env
+    links:
+      - db
+      - solr
+      - redis
+      - mailhog
+    volumes:
+      - ./compose/ckan/config/development.ini:/etc/ckan/development.ini
+      - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
+      - ./ckan-extensions/ckanext-defrareports:/usr/lib/ckan/venv/src/ckanext-defrareports
+    entrypoint: ""
+    user: root
+    command:
+      cron -f
+
+  location:
+    container_name: mdf-location
+    build:
+      context: .
+      dockerfile: compose/location/Dockerfile-dev
+    env_file:
+      - .envs/dev.env
+    volumes:
+      - ./compose/location/data/merged_results.csv:/merged_results.csv
+    ports:
+      - "5001:5000"
+    command: make --directory /go/src/location-lookup run
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.0
+    ports:
+      - "8025:8025"
+
+  # Load testing
+  # See: https://medium.com/locust-io-experiments/locust-io-experiments-running-in-docker-cae3c7f9386e
+  locust:
+    container_name: mdf-locust
+    image: grubykarol/locust:latest
+    env_file:
+      - .envs/dev.env
+    volumes:
+      - ./compose/locust/scripts:/locust
+    ports:
+      - "8089:8089"
