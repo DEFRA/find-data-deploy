@@ -33,6 +33,7 @@ set_environment () {
   export POSTGRES_USER=${CKAN_DB_USER}
   export CKAN_DB_NAME=${CKAN_DB_NAME}
   export CKAN_INI=${CKAN_INI}
+  export DB_HOST=${DB_HOST}
 }
 
 write_config () {
@@ -58,13 +59,13 @@ if [ ! -f /tmp/.initialized ]; then
     ckan-paster --plugin=ckanext-harvest harvester initdb -c ${CKAN_INI}
 
     # Set datastore permissions
-    ckan-paster --plugin=ckan datastore set-permissions -c ${CKAN_INI} | psql -h db -d datastore -U ${POSTGRES_USER}
+    ckan-paster --plugin=ckan datastore set-permissions -c ${CKAN_INI} | psql -h ${DB_HOST} -d datastore -U ${POSTGRES_USER}
 
     # Change postgis permissions (1/2)
-    psql -h db -d ${CKAN_DB_NAME} -U ${POSTGRES_USER} -c 'ALTER VIEW geometry_columns OWNER TO ckan_default;'
+    psql -h ${DB_HOST} -d ${CKAN_DB_NAME} -U ${POSTGRES_USER} -c 'ALTER VIEW geometry_columns OWNER TO ckan_default;'
 
     # Change postgis permissions (2/2)
-    psql -h db -d ${CKAN_DB_NAME} -U ${POSTGRES_USER} -c 'ALTER TABLE spatial_ref_sys OWNER TO ckan_default;'
+    psql -h ${DB_HOST} -d ${CKAN_DB_NAME} -U ${POSTGRES_USER} -c 'ALTER TABLE spatial_ref_sys OWNER TO ckan_default;'
 
     # Initialise the spatial database
     ckan-paster --plugin=ckanext-spatial spatial initdb 4326 -c ${CKAN_INI}

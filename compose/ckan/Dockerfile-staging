@@ -38,10 +38,6 @@ ENV CKAN_STORAGE_PATH=/var/lib/ckan
 ENV CKAN_VERSION=ckan-2.8.2
 
 # Build-time variables specified by docker-compose.yml / .env
-ARG CKAN_SITE_URL
-ARG GOOGLE_ANALYTICS_SITE_ID
-ARG GOOGLE_ANALYTICS_USERNAME
-ARG GOOGLE_ANALYTICS_PASSWORD
 ARG SENTRY_DSN
 ARG SENDGRID_PASSWORD
 
@@ -70,13 +66,8 @@ RUN ckan-pip install -U pip uwsgi gevent && \
 # Copy ini files over
 COPY ./compose/ckan/config/* /etc/ckan/
 
-COPY ./compose/ckan/entrypoints/* /
-RUN chmod a+x /ckan-*-entrypoint.sh
-
-# Add google analytics info to ini file
-RUN sed -i -e "s/^googleanalytics.id.*/googleanalytics.id = $GOOGLE_ANALYTICS_SITE_ID/g" /etc/ckan/staging.ini
-RUN sed -i -e "s/^googleanalytics.username.*/googleanalytics.username = $GOOGLE_ANALYTICS_USERNAME/g" /etc/ckan/staging.ini
-RUN sed -i -e "s/^googleanalytics.password.*/googleanalytics.password = $GOOGLE_ANALYTICS_PASSWORD/g" /etc/ckan/staging.ini
+COPY ./compose/ckan/entrypoints/ckan-entrypoint.sh /
+RUN chmod a+x /ckan-entrypoint.sh
 
 # Add sentry details to the ckan config
 RUN sed -i "s|^sentry.dsn.*|sentry.dsn = $SENTRY_DSN|g"  /etc/ckan/staging.ini
@@ -111,8 +102,8 @@ RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-defrare
 RUN /usr/lib/ckan/venv/bin/pip install -e /usr/lib/ckan/venv/src/ckanext-defrareports/
 
 # Copy init file
-COPY ./compose/ckan/entrypoints/* /
-RUN chmod a+x /ckan-*-entrypoint.sh
+COPY ./compose/ckan/entrypoints/ckan-entrypoint.sh /
+RUN chmod a+x /ckan-entrypoint.sh
 
 # Copy the supervisor config
 RUN mkdir -p /etc/supervisor/conf.d
@@ -132,7 +123,7 @@ RUN crontab /etc/cron.d/cronjobs
 # Copy Analytics Auth
 COPY ./compose/ckan/config/analytics-auth.json /analytics-auth.json
 
-ENTRYPOINT ["/ckan-staging-entrypoint.sh"]
+ENTRYPOINT ["/ckan-entrypoint.sh"]
 
 USER ckan
 EXPOSE 5000

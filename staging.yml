@@ -1,0 +1,160 @@
+version: "3"
+
+volumes:
+  pg_data_staging:
+  ckan_storage_staging:
+  letsencrypt_certs_staging:
+  letsencrypt_www_staging:
+
+services:
+
+  nginx_staging:
+    container_name: mdf-staging-nginx
+    hostname: nginx
+    build:
+      context: .
+      dockerfile: ./compose/nginx/Dockerfile-staging
+    env_file:
+      - .envs/staging.env
+    depends_on:
+      - ckan_staging
+      - location_staging
+    links:
+      - ckan_staging
+      - location_staging
+    restart: always
+    volumes:
+      - letsencrypt_certs_staging:/etc/letsencrypt
+      - letsencrypt_www_staging:/var/www/letsencrypt
+    ports:
+      - "80:80"
+      - "443:443"
+    expose:
+      - "80"
+      - "443"
+
+  ckan_staging:
+    container_name: mdf-staging-ckan
+    hostname: ckan
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile-staging
+      args:
+        - SENTRY_DSN=${SENTRY_DSN?Please set the SENTRY_DSN env var}
+        - SENDGRID_PASSWORD=${SENDGRID_PASSWORD?Please set the SENDGRID_PASSWORD env var}
+    env_file:
+      - .envs/staging.env
+    volumes:
+      - ckan_storage_staging:/var/lib/ckan
+    restart: always
+    links:
+      - db_staging
+      - solr_staging
+      - redis_staging
+    expose:
+      - "5000"
+    ports:
+      - "5000:5000"
+    command:
+      /usr/lib/ckan/venv/bin/uwsgi --pcre-jit --ini /uwsgi.conf --plugins http,python,gevent --socket /tmp/uwsgi.sock --uid 900 --gid 900 --http :5000 --master --enable-threads --paste config:/etc/ckan/staging.ini --lazy-apps --gevent 2000 -p 2 -L
+
+  supervisor_staging:
+    container_name: mdf-staging-supervisor
+    hostname: supervisor
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile-staging
+    env_file:
+      - .envs/staging.env
+    volumes:
+      - ckan_storage_staging:/var/lib/ckan
+    restart: always
+    links:
+      - db_staging
+      - solr_staging
+      - redis_staging
+      - location_staging
+    entrypoint: ""
+    user: root
+    command:
+      /usr/bin/supervisord
+
+  cron_staging:
+    container_name: mdf-staging-cron
+    hostname: cron
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile-staging
+    env_file:
+      - .envs/staging.env
+    volumes:
+      - ckan_storage_staging:/var/lib/ckan
+    restart: always
+    links:
+      - db_staging
+      - solr_staging
+      - redis_staging
+      - location_staging
+    entrypoint: ""
+    user: root
+    command:
+      cron -f
+
+  location_staging:
+    container_name: mdf-staging-location
+    hostname: location
+    restart: always
+    build:
+      context: .
+      dockerfile: ./compose/location/Dockerfile
+    env_file:
+      - .envs/staging.env
+    environment:
+      - LOCATION_MERGE_FILE=/merged_results.csv
+    ports:
+      - "5001:5000"
+
+  db_staging:
+    container_name: mdf-staging-db
+    hostname: db
+    build:
+      context: .
+      dockerfile: compose/postgresql/Dockerfile
+    env_file:
+      - .envs/staging.env
+    restart: always
+    volumes:
+      - pg_data_staging:/var/lib/postgresql/data
+    expose:
+      - "5432"
+
+  solr_staging:
+    container_name: mdf-staging-solr
+    hostname: solr
+    build:
+      context: .
+      dockerfile: compose/solr/Dockerfile
+    env_file:
+      - .envs/staging.env
+    restart: always
+    expose:
+      - "8983"
+
+  redis_staging:
+    container_name: mdf-staging-redis
+    image: redis:latest
+    hostname: redis
+    restart: always
+
+  letsencrypt_staging:
+    container_name: mdf-staging-letsencrypt
+    hostname: letsencrypt
+    build:
+      context: .
+      dockerfile: compose/letsencrypt/Dockerfile-staging
+    env_file:
+      - .envs/staging.env
+    volumes:
+      - letsencrypt_certs_staging:/etc/letsencrypt
+      - letsencrypt_www_staging:/var/www/letsencrypt
+    command: /bin/true
