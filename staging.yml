@@ -64,6 +64,9 @@ services:
     build:
       context: .
       dockerfile: compose/ckan/Dockerfile-staging
+      args:
+        - SENTRY_DSN=${SENTRY_DSN?Please set the SENTRY_DSN env var}
+        - SENDGRID_PASSWORD=${SENDGRID_PASSWORD?Please set the SENDGRID_PASSWORD env var}
     env_file:
       - .envs/staging.env
     volumes:
@@ -85,6 +88,9 @@ services:
     build:
       context: .
       dockerfile: compose/ckan/Dockerfile-staging
+      args:
+        - SENTRY_DSN=${SENTRY_DSN?Please set the SENTRY_DSN env var}
+        - SENDGRID_PASSWORD=${SENDGRID_PASSWORD?Please set the SENDGRID_PASSWORD env var}
     env_file:
       - .envs/staging.env
     volumes:
@@ -151,7 +157,7 @@ services:
     hostname: letsencrypt
     build:
       context: .
-      dockerfile: compose/letsencrypt/Dockerfile-staging
+      dockerfile: compose/letsencrypt/Dockerfile
     env_file:
       - .envs/staging.env
     volumes:

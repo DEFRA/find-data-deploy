@@ -1,0 +1,167 @@
+version: "3"
+
+volumes:
+  pg_data:
+  ckan_storage:
+  letsencrypt_certs:
+  letsencrypt_www:
+
+services:
+
+  nginx:
+    container_name: mdf-prod-nginx
+    image: mdf-nginx
+    build:
+      context: .
+      dockerfile: ./compose/nginx/Dockerfile
+    env_file:
+      - .envs/prod.env
+    depends_on:
+      - ckan
+      - location
+    links:
+      - ckan
+      - location
+    restart: always
+    volumes:
+      - letsencrypt_certs:/etc/letsencrypt
+      - letsencrypt_www:/var/www/letsencrypt
+    ports:
+      - "80:80"
+      - "443:443"
+    expose:
+      - "80"
+      - "443"
+
+  ckan:
+    container_name: mdf-prod-ckan
+    image: mdf-ckan
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile
+      args:
+        - GOOGLE_ANALYTICS_SITE_ID=${GOOGLE_ANALYTICS_SITE_ID?Please set the GOOGLE_ANALYTICS_SITE_ID env var}
+        - GOOGLE_ANALYTICS_USERNAME=${GOOGLE_ANALYTICS_USERNAME?Please set the GOOGLE_ANALYTICS_USERNAME env var}
+        - GOOGLE_ANALYTICS_PASSWORD=${GOOGLE_ANALYTICS_PASSWORD?Please set the GOOGLE_ANALYTICS_PASSWORD env var}
+        - SENTRY_DSN=${SENTRY_DSN?Please set the SENTRY_DSN env var}
+        - SENDGRID_PASSWORD=${SENDGRID_PASSWORD?Please set the SENDGRID_PASSWORD env var}
+    env_file:
+      - .envs/prod.env
+    volumes:
+      - ckan_storage:/var/lib/ckan
+    restart: always
+    links:
+      - db
+      - solr
+      - redis
+    expose:
+      - "5000"
+    ports:
+      - "5000:5000"
+    command:
+      /usr/lib/ckan/venv/bin/uwsgi --pcre-jit --ini /uwsgi.conf --plugins http,python,gevent --socket /tmp/uwsgi.sock --uid 900 --gid 900 --http :5000 --master --enable-threads --paste config:/etc/ckan/production.ini --lazy-apps --gevent 2000 -p 2 -L
+
+  supervisor:
+    container_name: mdf-prod-supervisor
+    image: mdf-supervisor
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile
+      args:
+        - SENTRY_DSN=${SENTRY_DSN?Please set the SENTRY_DSN env var}
+        - SENDGRID_PASSWORD=${SENDGRID_PASSWORD?Please set the SENDGRID_PASSWORD env var}
+    env_file:
+      - .envs/prod.env
+    volumes:
+      - ckan_storage:/var/lib/ckan
+    restart: always
+    links:
+      - db
+      - solr
+      - redis
+      - location
+    entrypoint: ""
+    user: root
+    command:
+      /usr/bin/supervisord
+
+  cron:
+    container_name: mdf-prod-cron
+    image: mdf-cron
+    build:
+      context: .
+      dockerfile: compose/ckan/Dockerfile
+      args:
+        - GOOGLE_ANALYTICS_SITE_ID=${GOOGLE_ANALYTICS_SITE_ID?Please set the GOOGLE_ANALYTICS_SITE_ID env var}
+        - GOOGLE_ANALYTICS_USERNAME=${GOOGLE_ANALYTICS_USERNAME?Please set the GOOGLE_ANALYTICS_USERNAME env var}
+        - GOOGLE_ANALYTICS_PASSWORD=${GOOGLE_ANALYTICS_PASSWORD?Please set the GOOGLE_ANALYTICS_PASSWORD env var}
+        - SENTRY_DSN=${SENTRY_DSN?Please set the SENTRY_DSN env var}
+        - SENDGRID_PASSWORD=${SENDGRID_PASSWORD?Please set the SENDGRID_PASSWORD env var}
+    env_file:
+      - .envs/prod.env
+    volumes:
+      - ckan_storage:/var/lib/ckan
+    restart: always
+    links:
+      - db
+      - solr
+      - redis
+      - location
+    entrypoint: ""
+    user: root
+    command:
+      cron -f
+
+  location:
+    container_name: mdf-prod-location
+    restart: always
+    build:
+      context: .
+      dockerfile: ./compose/location/Dockerfile
+    env_file:
+      - .envs/prod.env
+    environment:
+      - LOCATION_MERGE_FILE=/merged_results.csv
+    ports:
+      - "5001:5000"
+
+  db:
+    container_name: mdf-prod-db
+    image: mdf-db
+    build:
+      context: .
+      dockerfile: compose/postgresql/Dockerfile
+    env_file:
+      - .envs/prod.env
+    restart: always
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+
+  solr:
+    container_name: mdf-prod-solr
+    image: mdf-solr
+    build:
+      context: .
+      dockerfile: compose/solr/Dockerfile
+    restart: always
+    expose:
+      - "8983"
+
+  redis:
+    container_name: mdf-prod-redis
+    image: redis:latest
+    restart: always
+
+  letsencrypt:
+    container_name: mdf-prod-letsencrypt
+    build:
+      context: .
+      dockerfile: compose/letsencrypt/Dockerfile
+    env_file:
+      - .envs/prod.env
+    volumes:
+      - letsencrypt_certs:/etc/letsencrypt
+      - letsencrypt_www:/var/www/letsencrypt
+    command: /bin/true
