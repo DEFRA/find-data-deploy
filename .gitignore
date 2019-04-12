@@ -116,3 +116,7 @@ dmypy.json
 .idea
 compose/location/data/
 analytics-auth.json
+compose/ckan/config/production.ini
+compose/ckan/config/staging.ini
+compose/nginx/config/htpasswd
+
