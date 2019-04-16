@@ -1,0 +1,1 @@
+compose/postgresql/docker-entrypoint-initdb.d/20_postgis_permissions.sql
