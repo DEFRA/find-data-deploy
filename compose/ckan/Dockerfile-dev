@@ -60,8 +60,12 @@ RUN ckan-pip install -U pip && \
 # Copy production.ini over so it's accessiblele during build
 COPY ./compose/ckan/config/*.ini /etc/ckan/
 
+RUN true
+
 # Defra specific
 COPY ./compose/ckan/scripts/* /
+
+RUN true
 
 # Install ckan
 COPY ./compose/ckan/requirements.txt /requirements.txt
