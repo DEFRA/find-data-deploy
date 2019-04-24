@@ -17,3 +17,4 @@ ckanext-sentry==0.0.2
 ckanext-xloader==0.3.1
 requests[security]
 messytables==0.15.2
+psycopg2==2.7.3
