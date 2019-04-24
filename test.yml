@@ -8,35 +8,21 @@ volumes:
 services:
   test_ckan:
     container_name: mdf-test-ckan
-    hostname: ckan
-    restart: "no"`
     build:
       context: .
-      dockerfile: compose/ckan/Dockerfile-dev
-      args:
-        - CKAN_SITE_URL=http://localhost:5000
-        - GOOGLE_ANALYTICS_SITE_ID=""
-        - GOOGLE_ANALYTICS_USERNAME=""
+      dockerfile: compose/ckan/Dockerfile-test
+    env_file:
+      - .envs/test.env
     links:
       - test_db
       - test_solr
       - test_redis
       - test_location
     ports:
-      - "0.0.0.0:${CKAN_PORT}:5000"
-    environment:
-      - CKAN_SQLALCHEMY_URL=postgresql://ckan_default:ckan@test_db/ckan_test
-      - CKAN_SOLR_URL=http://test_solr:8983/solr/ckan
-      - CKAN_REDIS_URL=redis://test_redis:6379/1
-      - CKAN_DATAPUSHER_URL=http://datapusher:8800
-      - CKAN_SITE_URL=http://localhost:5000
-      - CKAN_MAX_UPLOAD_SIZE_MB=100
-      - POSTGRES_PASSWORD=ckan
-      - DATASTORE_READONLY_PASSWORD=ckan
-      - CKAN_INI=/etc/ckan/test.ini
-      - CKAN_DB_NAME=ckan_test
+      - "0.0.0.0:5000:5000"
     volumes:
-      - ./ckan-extensions/ckanext-defra/test.ini:/etc/ckan/test.ini
+      - ./compose/ckan/scripts/init_tests.sh:/init_tests.sh
+      - ./compose/ckan/entrypoints/test-entrypoint.sh:/test-entrypoint.sh
       - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
       - ./ckan-extensions/ckanext-defrareports:/usr/lib/ckan/venv/src/ckanext-defrareports
     command:
@@ -44,17 +30,12 @@ services:
 
   test_db:
     container_name: mdf-test-db
-    hostname: db
     restart: "no"
     build:
       context: .
       dockerfile: compose/postgresql/Dockerfile
-      args:
-        - DATASTORE_READONLY_PASSWORD=${DATASTORE_READONLY_PASSWORD}
-        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    environment:
-      - DATASTORE_READONLY_PASSWORD=${DATASTORE_READONLY_PASSWORD}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    env_file:
+      - .envs/test.env
     volumes:
       - test_pg_data:/var/lib/postgresql/data
     ports:
@@ -62,32 +43,27 @@ services:
 
   test_solr:
     container_name: mdf-test-solr
-    hostname: solr
     restart: "no"
     build:
       context: .
       dockerfile: compose/solr/Dockerfile
-    ports:
-      - "8983:8983"
 
   test_redis:
     container_name: mdf-test-redis
-    hostname: redis
     restart: "no"
     image: redis:latest
 
   test_location:
     container_name: mdf-test-location
-    hostname: location
     restart: "no"
     build:
       context: .
       dockerfile: compose/location/Dockerfile-dev
+    env_file:
+      - .envs/test.env
     volumes:
       - ./services/golang/location-lookup:/go/src/location-lookup
-      - ./compose/location/data/merged_results.csv:/merged_results.csv
+      - ./fixtures/test_locations.csv:/merged_results.csv
     ports:
       - "5001:5000"
-    environment:
-      - LOCATION_MERGE_FILE=/merged_results.csv
     command: make --directory /go/src/location-lookup run
