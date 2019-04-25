@@ -62,11 +62,6 @@ COPY ./compose/ckan/config/*.ini /etc/ckan/
 
 RUN true
 
-# Defra specific
-COPY ./compose/ckan/scripts/* /
-
-RUN true
-
 # Install ckan
 COPY ./compose/ckan/requirements.txt /requirements.txt
 RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckan/dev-requirements.txt

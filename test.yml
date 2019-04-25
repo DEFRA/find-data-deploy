@@ -20,11 +20,6 @@ services:
       - test_location
     ports:
       - "0.0.0.0:5000:5000"
-    volumes:
-      - ./compose/ckan/scripts/init_tests.sh:/init_tests.sh
-      - ./compose/ckan/entrypoints/test-entrypoint.sh:/test-entrypoint.sh
-      - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
-      - ./ckan-extensions/ckanext-defrareports:/usr/lib/ckan/venv/src/ckanext-defrareports
     command:
       /usr/lib/ckan/venv/bin/paster serve /etc/ckan/test.ini --reload
 
