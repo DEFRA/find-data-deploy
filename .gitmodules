@@ -3,7 +3,7 @@
 	url = https://github.com/DEFRA/ckanext-defra.git
 [submodule "services/golang/location-lookup"]
 	path = services/golang/location-lookup
-	url = https://github.com/DEFRA/location-lookup-prototype.git
+	url = https://github.com/DEFRA/find-data-location-lookup.git
 [submodule "ckan-extensions/ckanext-defrareports"]
 	path = ckan-extensions/ckanext-defrareports
 	url = https://github.com/DEFRA/ckanext-defrareports.git
