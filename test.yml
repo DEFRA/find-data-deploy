@@ -58,12 +58,8 @@ services:
     restart: "no"
     build:
       context: .
-      dockerfile: compose/location/Dockerfile-dev
+      dockerfile: compose/location/Dockerfile-test
     env_file:
       - .envs/test.env
-    volumes:
-      - ./services/golang/location-lookup:/go/src/location-lookup
-      - ./fixtures/test_locations.csv:/merged_results.csv
     ports:
       - "5001:5000"
-    command: make --directory /go/src/location-lookup run
