@@ -8,8 +8,8 @@ def step_impl(context):
     """
     :type context: behave.runner.Context
     """
-    context.dataset_name = 'find-data-quality'
-    context.dataset_title = 'Find Data: Metadata quality'
+    context.dataset_name = 'ckan-quality'
+    context.dataset_title = 'CKAN: Metadata quality'
     context.dataset_publisher = 'Department for Environment, Food & Rural Affairs'
     context.dataset_license = 'UK Open Government Licence (OGL)'
 
@@ -105,7 +105,7 @@ def step_impl(context):
     :type context: behave.runner.Context
     """
     context.dataset_id = '9dbed27f-fbca-4a17-98fa-f437bfba7e27'
-    context.dataset_name = 'oak-spring-and-autumn-phenology-data-in-southern-england-2011-2014'
+    context.dataset_name = 'ckan-quality'
 
 
 @step("they choose to preview the data")

@@ -18,22 +18,23 @@ Feature: Filtering
     Then they see a list of search results
     And the search results are licensed under that license
 
-  Scenario: User filters by private data
-    When a user visits the Data page
-    And they select to view private datasets
-    Then they see a list of search results
-    And the search results are marked as private
-
-# FIXME: There are no reference datasets on the platform at the moment
-#  Scenario: User filters by core reference data
+# FIXME: Need to add a private dataset to the fixtures
+#  Scenario: User filters by private data
 #    When a user visits the Data page
-#    And they select to view core reference data
+#    And they select to view private datasets
 #    Then they see a list of search results
-#    And the search results are marked as reference data
+#    And the search results are marked as private
 
-# FIXME: There are no GDPR datasets on the platform at the moment
-#  Scenario: User filters by GDPR data
-#    When a user visits the Data page
-#    And they select to view GDPR data
-#    Then they see a list of search results
-#    And the search results are marked as GDPR
+## FIXME: There are no reference datasets on the platform at the moment
+##  Scenario: User filters by core reference data
+##    When a user visits the Data page
+##    And they select to view core reference data
+##    Then they see a list of search results
+##    And the search results are marked as reference data
+#
+## FIXME: There are no GDPR datasets on the platform at the moment
+##  Scenario: User filters by GDPR data
+##    When a user visits the Data page
+##    And they select to view GDPR data
+##    Then they see a list of search results
+##    And the search results are marked as GDPR
