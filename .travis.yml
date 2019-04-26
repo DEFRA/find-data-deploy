@@ -10,7 +10,7 @@ addons:
     access_key:
       secure: "LHabcdbmd7v6Iqnu20UVnUWGDvmQ+Q1uWFfyXiT3dGwNZjQda+4eSqSQt1kn/iJlYJkPiTrFusq2GEdLafUH6wHGNiPqjotumLn3OtYVF+tiDiy7nPSHGKU3qPt1QPZNaBLfhaPnSqnRVtWj2v8oYUlr430ujYojzYSAYLfbvkiQZpvIRLXpC2kuO8h9LvEDviXHg2VORlx5L17DVgeaFgo5k5bC2+uA64+1AzSZgZFN43mMiToxrMYSwHDPDb6SUmMV2+BLBO3BkeCnLug+FRIzAfIcuY4YpxLGDXAUBYUwWRdIJhWGAiBadMsI0YrYpJzJdnMbYzUywnM3qod+yhZyzO387ikuT1JsNX+rIJU72fhaUY0DZ8JVSrLUu/j+LwEOm+2Fnf3V+E14M+sTm7HrRU4WgadHUw4qHeNyBG/PHn/WWHS/Z/m2W/73UI1IIzAukBuleHGQIHKVIM21Y7a4m3yxjhLWCGkoobXSlFPc1wZWOo+0S9N00wAaZ42AWMYSnUz0GMhRgtSoDdHDSu1r6zeUo1CAwjip8kwGMpm/FtDmhsq4SyQa1Jw+0QftraqLJfYER3b8aWpt96jgueyX8GmmSBGGzwezF4ufXDVT7S8fiObelZE/BT/2PrY3NphFB/tVwp4pQevH/fmKdr4DdpyxowKu4WRLQ/kZ8ac="
 install:
-  - /travis-build.bash
+  - bash bin/travis-build.bash
   - pip install coveralls
 script: sh bin/travis-run.sh
 after_success:
