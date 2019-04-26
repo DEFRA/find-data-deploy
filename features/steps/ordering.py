@@ -23,8 +23,11 @@ def step_impl(context):
     """
     datasets = []
     for dataset in context.driver.find_elements_by_class_name('dataset-heading'):
-        datasets.append(dataset.find_elements_by_tag_name('a')[0].text)
-    assert datasets == sorted(datasets), 'Datasets not sorted alphabetically'
+        datasets.append(dataset.find_elements_by_tag_name('a')[0].get_attribute('href'))
+    sorted_datasets = sorted(datasets)
+    print(datasets, sorted_datasets)
+    for i, ds in enumerate(datasets):
+        assert ds == sorted_datasets[i], '{} != {}'.format(ds, sorted_datasets[i])
 
 
 @step("they reorder the results by name descending")
@@ -46,10 +49,10 @@ def step_impl(context):
         datasets.append(dataset.find_elements_by_tag_name('a')[0].text.lower().split(' ')[0])
 
     reversed_datasets = list(reversed(sorted(datasets)))
-    for i, ds in enumerate(datasets):
-        assert ds == reversed_datasets[i], '{} != {}'.format(
+    for i, ds in enumerate(sorted(datasets)):
+        assert ds == reversed_datasets[len(reversed_datasets) - 1 - i], '{} != {}'.format(
             ds,
-            reversed_datasets[i]
+            reversed_datasets[-i]
         )
 
 

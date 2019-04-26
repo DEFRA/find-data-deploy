@@ -2,3 +2,5 @@ behave==1.2.6
 selenium==3.141.0
 webdriver-manager==1.7
 python-dateutil==2.8.0
+pyvirtualdisplay==0.2.1
+ckanclient==0.10

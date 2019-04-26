@@ -59,6 +59,9 @@ ckan-paster --plugin=ckanext-spatial spatial initdb 4326 -c ${CKAN_INI}
 ckan-paster --plugin=ckanext-harvest harvester initdb -c ${CKAN_INI}
 ckan-paster --plugin=ckanext-ga-report initdb -c ${CKAN_INI}
 
+# Import publishers
+ckan-paster --plugin=ckanext-defra import_publishers -c ${CKAN_INI}
+
 function postgres_ready(){
 /usr/lib/ckan/venv/bin/python << END
 import sys

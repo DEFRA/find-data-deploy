@@ -1,5 +1,4 @@
 from behave import *
-from selenium.webdriver.common.by import By
 
 use_step_matcher("re")
 
@@ -10,7 +9,7 @@ def step_impl(context):
     :type context: behave.runner.Context
 
     """
-    context.pub_name = 'Joint Nature Conservation Committee'
+    context.pub_name = 'Department for Environment, Food & Rural Affairs'
     facets = context.driver.find_element_by_class_name('nav-facet')
     link = facets.find_element_by_xpath('//a[@title="{}"]'.format(context.pub_name))
     link.click()
@@ -87,7 +86,7 @@ def step_impl(context):
     :type context: behave.runner.Context
     """
     facets = context.driver.find_element_by_class_name('nav-facet')
-    link = facets.find_element_by_xpath('//a[@title="Private datasets"]')
+    link = facets.find_element_by_xpath('//input[@name="extras_private-resources"]')
     link.click()
 
 
