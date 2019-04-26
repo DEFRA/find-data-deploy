@@ -1,3 +1,5 @@
-#!/bin/sh -e
+#!/bin/bash
+set -e
 
-behave
+echo "Running feature test"
+docker-compose -f test.yml run --rm test_selenium /usr/local/bin/behave /deploy/features/
