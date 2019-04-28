@@ -47,21 +47,6 @@ fi
 
 set_environment
 
-# Create the db tables
-ckan-paster --plugin=ckan db init -c ${CKAN_INI}
-ckan-paster --plugin=ckanext-report report initdb -c ${CKAN_INI}
-
-# Set permissions for test databases
-ckan-paster --plugin=ckan datastore set-permissions -c ${CKAN_INI} | psql -U ckan_default -h test_db -d datastore_test
-
-# Initialise the spatial database
-ckan-paster --plugin=ckanext-spatial spatial initdb 4326 -c ${CKAN_INI}
-ckan-paster --plugin=ckanext-harvest harvester initdb -c ${CKAN_INI}
-ckan-paster --plugin=ckanext-ga-report initdb -c ${CKAN_INI}
-
-# Import publishers
-ckan-paster --plugin=ckanext-defra import_publishers -c ${CKAN_INI}
-
 function postgres_ready(){
 /usr/lib/ckan/venv/bin/python << END
 import sys
@@ -80,5 +65,20 @@ until postgres_ready; do
 done
 
 >&2 echo "Postgres is up - continuing..."
+
+# Create the db tables
+ckan-paster --plugin=ckan db init -c ${CKAN_INI}
+ckan-paster --plugin=ckanext-report report initdb -c ${CKAN_INI}
+
+# Set permissions for test databases
+ckan-paster --plugin=ckan datastore set-permissions -c ${CKAN_INI} | psql -U ckan_default -h test_db -d datastore_test
+
+# Initialise the spatial database
+ckan-paster --plugin=ckanext-spatial spatial initdb 4326 -c ${CKAN_INI}
+ckan-paster --plugin=ckanext-harvest harvester initdb -c ${CKAN_INI}
+ckan-paster --plugin=ckanext-ga-report initdb -c ${CKAN_INI}
+
+# Import publishers
+ckan-paster --plugin=ckanext-defra import_publishers -c ${CKAN_INI}
 
 exec "$@"
