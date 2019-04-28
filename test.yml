@@ -28,6 +28,7 @@ services:
 
   test_db:
     container_name: mdf-test-db
+    hostname: test_db
     restart: "no"
     build:
       context: .
