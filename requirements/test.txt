@@ -4,3 +4,4 @@ webdriver-manager==1.7
 python-dateutil==2.8.0
 pyvirtualdisplay==0.2.1
 ckanclient==0.10
+psycopg2==2.7.3
