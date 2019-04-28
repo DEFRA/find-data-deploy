@@ -10,9 +10,9 @@ echo "Building containers"
 docker-compose -f test.yml build
 
 echo "Creating test data"
-docker-compose -f test.yml run --rm test_ckan /usr/lib/ckan/venv/bin/ckan-paster --plugin=ckan create-test-data
+docker-compose -f test.yml run --rm test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckan create-test-data
 
 echo "Generating reports"
-docker-compose -f test.yml run --rm test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckanext-defrareports check_broken_resources
+docker-compose -f test.yml run --rm test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckanext-report report generate -c /etc/ckan/test.ini
 
 echo "travis-build.bash is done."
