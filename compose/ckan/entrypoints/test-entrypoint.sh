@@ -60,7 +60,7 @@ END
 }
 
 until postgres_ready; do
-  >&2 echo "Postgres is unavailable - sleeping"
+  >&2 echo "Postgres is unavailable - sleeping - $CKAN_DB_NAME - $CKAN_DB_USER - $POSTGRES_PASSWORD - $DB_HOST"
   sleep 1
 done
 
