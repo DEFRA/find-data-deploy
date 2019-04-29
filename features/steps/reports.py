@@ -49,10 +49,10 @@ def step_impl(context):
     context.driver.get(context.base_url + '/user/login')
     username = context.driver.find_element_by_id('field-login')
     username.clear()
-    username.send_keys('admin')
+    username.send_keys('testsysadmin')
     password = context.driver.find_element_by_id('field-password')
     password.clear()
-    password.send_keys('correct horse battery staple')
+    password.send_keys('testsysadmin')
     password.send_keys(Keys.RETURN)
 
 

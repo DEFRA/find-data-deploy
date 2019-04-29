@@ -64,7 +64,7 @@ def step_impl(context):
     context.driver.get(context.base_url)
     input = context.driver.find_element_by_xpath('//*[@id="dataset-search-form"]/div[1]/input')
     input.clear()
-    input.send_keys('organization:defra AND title:CKAN:*')
+    input.send_keys('organization:david AND title:A Novel*')
     input.send_keys(Keys.ENTER)
 
 
