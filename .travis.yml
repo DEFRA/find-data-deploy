@@ -13,7 +13,8 @@ install:
 script:
   - docker-compose -f test.yml up -d --build
   - docker-compose -f test.yml ps
-#  - docker-compose exec dbbackup /bin/bash -c "until psql -l; do echo 'db unavailable. sleeping'; sleep 1; done"
+  - docker-compose -f test.yml run --rm test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckan create-test-data
+  - docker-compose -f test.yml run --rm test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckanext-report report generate -c /etc/ckan/test.ini
   - sh bin/travis-run.sh
 after_success:
     - coveralls
