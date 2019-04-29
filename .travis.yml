@@ -4,7 +4,8 @@ python:
     - "2.7"
 services:
   - docker
-
+env:
+  - PGPASSWORD=ckan
 before_install:
   - docker-compose -f test.yml build
 install:
@@ -13,8 +14,9 @@ install:
 script:
   - docker-compose -f test.yml up -d --build
   - docker-compose -f test.yml ps
+  - docker-compose exec test_ckan /bin/bash -c "until psql -h test_db -U ckan_default -l; do echo 'db unavailable. sleeping'; sleep 1; done"
   - docker-compose -f test.yml run --rm test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckan create-test-data
   - docker-compose -f test.yml run --rm test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckanext-report report generate -c /etc/ckan/test.ini
-  - sh bin/travis-run.sh
+  - docker-compose -f test.yml run --rm test_selenium /deploy/compose/selenium/run_tests.sh; echo $?
 after_success:
     - coveralls
