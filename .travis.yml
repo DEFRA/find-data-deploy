@@ -12,7 +12,7 @@ install:
   - pip install coveralls
 script:
   - docker-compose -f test.yml up -d --build
-  - docker-compose ps -f test.yml
+  - docker-compose -f test.yml ps
 #  - docker-compose exec dbbackup /bin/bash -c "until psql -l; do echo 'db unavailable. sleeping'; sleep 1; done"
   - sh bin/travis-run.sh
 after_success:
