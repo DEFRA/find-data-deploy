@@ -6,11 +6,8 @@ services:
   - docker
 env:
   - PGPASSWORD=ckan
-before_install:
-  - docker-compose -f test.yml build
 install:
   - bash bin/travis-build.bash
-  - pip install coveralls
 script:
   - docker-compose -f test.yml up -d --build
   - docker-compose -f test.yml ps
@@ -21,5 +18,3 @@ script:
   - docker-compose -f test.yml exec test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckanext-defra import_publishers -c /etc/ckan/test.ini
   - docker-compose -f test.yml exec test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckanext-report report generate -c /etc/ckan/test.ini
   - docker-compose -f test.yml run --rm test_selenium /deploy/compose/selenium/run_tests.sh; echo $?
-after_success:
-    - coveralls
