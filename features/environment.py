@@ -7,7 +7,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 def before_feature(context, feature):
     if 'TRAVIS' in os.environ:
-        context.base_url = 'http://localhost:5000'
+        context.base_url = 'http://test_ckan:5000'
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--headless')
