@@ -1,4 +1,16 @@
-### Get up and running locally
+### Defra - Find Data Service
+
+[![Build Status](https://travis-ci.org/DEFRA/find-data-deploy.svg?branch=master)](https://travis-ci.org/DEFRA/find-data-deploy)
+
+This repository contains the development and deployment config for Defra's Find Data Project.
+
+**Status:** Development
+
+**CKAN Version**: 2.6+
+
+
+
+#### Get up and running locally
 
 1. Grab the repo
     ```
@@ -87,11 +99,6 @@ docker-compose run --rm letsencrypt letsencrypt renew
 ```
 
 ### Unit Tests
-
-Before you first run tests locally you will need to setup the test db
-```.env
-docker-compose -f test.yml run --rm test_ckan /init_tests.sh
-```
 
 Run tests for both the defra and defrareports plugin. This will spin up a new dev environment and run the tests.
 ```.env
