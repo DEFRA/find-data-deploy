@@ -31,10 +31,3 @@ Feature: Filtering
 #    And they select to view core reference data
 #    Then they see a list of search results
 #    And the search results are marked as reference data
-
-# FIXME: There are no GDPR datasets on the platform at the moment
-#  Scenario: User filters by GDPR data
-#    When a user visits the Data page
-#    And they select to view GDPR data
-#    Then they see a list of search results
-#    And the search results are marked as GDPR
