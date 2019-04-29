@@ -21,6 +21,11 @@ services:
       - test_solr
       - test_redis
       - test_location
+    depends_on:
+      - test_db
+      - test_solr
+      - test_redis
+      - test_location
     ports:
       - "0.0.0.0:5000:5000"
     command:
@@ -79,3 +84,4 @@ services:
     links:
       - test_ckan
       - test_location
+      - test_db
