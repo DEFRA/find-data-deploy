@@ -18,16 +18,16 @@ Feature: Reports
       | publishing      |
       | access          |
 
-  Scenario Outline: Admin users can refresh the report manually
-    Given an admin user
-    When a user views the <report> report
-    Then they can refresh the report manually
-    Examples: Reports
-      | report     |
-      | publishing |
-      | access     |
-      | broken     |
-      | quality    |
+#  Scenario Outline: Admin users can refresh the report manually
+#    Given an admin user
+#    When a user views the <report> report
+#    Then they can refresh the report manually
+#    Examples: Reports
+#      | report     |
+#      | publishing |
+#      | access     |
+#      | broken     |
+#      | quality    |
 
   Scenario Outline: Users can download the report data as JSON
     When a user views the <report> report

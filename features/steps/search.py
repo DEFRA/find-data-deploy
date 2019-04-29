@@ -19,7 +19,7 @@ def step_impl(context):
     context.driver.get(context.base_url)
     input = context.driver.find_element_by_xpath('//*[@id="dataset-search-form"]/div[1]/input')
     input.clear()
-    input.send_keys('Quarantine Premises Approvals')
+    input.send_keys('A Novel By Tolstoy')
     input.send_keys(Keys.ENTER)
 
 
@@ -41,7 +41,7 @@ def step_impl(context):
     datasets = []
     for item in context.driver.find_elements_by_class_name('dataset-heading'):
         datasets.append(item.find_elements_by_tag_name('a')[0].text)
-    assert 'Quarantine Premises Approvals 2014' in datasets
+    assert 'A Novel By Tolstoy' in datasets
 
 
 @step("they search for a term in the description of a dataset")
@@ -52,7 +52,7 @@ def step_impl(context):
     context.driver.get(context.base_url)
     input = context.driver.find_element_by_xpath('//*[@id="dataset-search-form"]/div[1]/input')
     input.clear()
-    input.send_keys('approved quarantine facility')
+    input.send_keys('Foreign characters:')
     input.send_keys(Keys.ENTER)
 
 
@@ -64,7 +64,7 @@ def step_impl(context):
     context.driver.get(context.base_url)
     input = context.driver.find_element_by_xpath('//*[@id="dataset-search-form"]/div[1]/input')
     input.clear()
-    input.send_keys('organization:ne AND title:agri*')
+    input.send_keys('organization:defra AND title:CKAN:*')
     input.send_keys(Keys.ENTER)
 
 
@@ -77,7 +77,7 @@ def step_impl(context):
         x.text for x in context.driver.find_elements_by_class_name('dataset-publisher-heading')
     ))
     assert len(publishers) == 1
-    assert publishers[0] == 'Published by Natural England'
+    assert publishers[0] == 'Defra'
 
 
 @step('the search results start with "agri"')
