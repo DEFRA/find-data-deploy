@@ -18,6 +18,7 @@ Feature: Reports
       | publishing      |
       | access          |
 
+# FIXME: Need to create an admin user programatically
 #  Scenario Outline: Admin users can refresh the report manually
 #    Given an admin user
 #    When a user views the <report> report
