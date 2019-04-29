@@ -47,12 +47,31 @@ fi
 
 set_environment
 
+function postgres_ready(){
+/usr/lib/ckan/venv/bin/python << END
+import sys
+import psycopg2
+try:
+    conn = psycopg2.connect(dbname="$CKAN_DB_NAME", user="$CKAN_DB_USER", password="$POSTGRES_PASSWORD", host="$DB_HOST")
+except psycopg2.OperationalError:
+    sys.exit(-1)
+sys.exit(0)
+END
+}
+
+until postgres_ready; do
+  >&2 echo "Postgres is unavailable - sleeping"
+  sleep 1
+done
+
+>&2 echo "Postgres is up - continuing..."
+
 # Create the db tables
 ckan-paster --plugin=ckan db init -c ${CKAN_INI}
 ckan-paster --plugin=ckanext-report report initdb -c ${CKAN_INI}
 
 # Set permissions for test databases
-ckan-paster --plugin=ckan datastore set-permissions -c ${CKAN_INI} | psql -U ckan_default -h test_db -d datastore_test
+ckan-paster --plugin=ckan datastore set-permissions -c ${CKAN_INI} | psql -U ckan_default -h test_db -d datastore
 
 # Initialise the spatial database
 ckan-paster --plugin=ckanext-spatial spatial initdb 4326 -c ${CKAN_INI}
