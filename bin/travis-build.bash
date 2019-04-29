@@ -6,8 +6,8 @@ echo "This is travis-build.bash..."
 echo "Installing test requirements"
 pip install -r requirements/test.txt
 
-echo "Building containers"
-docker-compose -f test.yml build
+#echo "Building containers"
+#docker-compose -f test.yml build
 
 #echo "Bringing containers up"
 #docker-compose -f test.yml up -d
