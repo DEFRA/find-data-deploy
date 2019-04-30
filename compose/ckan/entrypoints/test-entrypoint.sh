@@ -66,29 +66,32 @@ done
 
 >&2 echo "Postgres is up - continuing..."
 
-# Create the db tables
-echo "Init ckan db"
-ckan-paster --plugin=ckan db init -c ${CKAN_INI} || true
+if [[ -z "${TRAVIS}" ]]; then
 
-echo "Init reports db"
-ckan-paster --plugin=ckanext-report report initdb -c ${CKAN_INI} || true
+    # Create the db tables
+    echo "Init ckan db"
+    ckan-paster --plugin=ckan db init -c ${CKAN_INI} || true
 
-# Set permissions for test databases
-echo "Set permissions"
-ckan-paster --plugin=ckan datastore set-permissions -c ${CKAN_INI} | psql -U ckan_default -h test_db -d datastore
+    echo "Init reports db"
+    ckan-paster --plugin=ckanext-report report initdb -c ${CKAN_INI} || true
 
-# Initialise the spatial database
-echo "Init spatial db"
-ckan-paster --plugin=ckanext-spatial spatial initdb 4326 -c ${CKAN_INI} || true
+    # Set permissions for test databases
+    echo "Set permissions"
+    ckan-paster --plugin=ckan datastore set-permissions -c ${CKAN_INI} | psql -U ckan_default -h test_db -d datastore
 
-echo "Init harvester"
-ckan-paster --plugin=ckanext-harvest harvester initdb -c ${CKAN_INI} || true
+    # Initialise the spatial database
+    echo "Init spatial db"
+    ckan-paster --plugin=ckanext-spatial spatial initdb 4326 -c ${CKAN_INI} || true
 
-echo "Init analytics"
-ckan-paster --plugin=ckanext-ga-report initdb -c ${CKAN_INI} || true
+    echo "Init harvester"
+    ckan-paster --plugin=ckanext-harvest harvester initdb -c ${CKAN_INI} || true
 
-# Import publishers
-echo "Import publishers"
-ckan-paster --plugin=ckanext-defra import_publishers -c ${CKAN_INI} || true
+    echo "Init analytics"
+    ckan-paster --plugin=ckanext-ga-report initdb -c ${CKAN_INI} || true
+
+    # Import publishers
+    echo "Import publishers"
+    ckan-paster --plugin=ckanext-defra import_publishers -c ${CKAN_INI} || true
+fi
 
 exec "$@"
