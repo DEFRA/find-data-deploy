@@ -76,7 +76,7 @@ def step_impl(context):
 
     for url in urls:
         context.driver.get(url)
-        license = context.driver.find_element_by_xpath('//*[@id="content"]/div[3]/aside/div/div[2]/section/div/p/a[1]')
+        license = context.driver.find_element_by_class_name('license-text')
         assert license.text == context.dataset_license
 
 
@@ -85,8 +85,7 @@ def step_impl(context):
     """
     :type context: behave.runner.Context
     """
-    facets = context.driver.find_element_by_class_name('nav-facet')
-    link = facets.find_element_by_xpath('//input[@name="extras_private-resources"]')
+    link = context.driver.find_element_by_xpath('//input[@name="extras_private-resources"]')
     link.click()
 
 
@@ -104,8 +103,7 @@ def step_impl(context):
     """
     :type context: behave.runner.Context
     """
-    facets = context.driver.find_element_by_class_name('nav-facet')
-    link = facets.find_element_by_xpath('//a[@title="Reference Data"]')
+    link = context.driver.find_element_by_xpath('//input[@name="extras_reference"]')
     link.click()
 
 
@@ -115,23 +113,4 @@ def step_impl(context):
     :type context: behave.runner.Context
     """
     # TODO: We don't have any reference data just yet
-    pass
-
-
-@step("they select to view GDPR data")
-def step_impl(context):
-    """
-    :type context: behave.runner.Context
-    """
-    facets = context.driver.find_element_by_class_name('nav-facet')
-    link = facets.find_element_by_xpath('//a[@title="GDPR"]')
-    link.click()
-
-
-@step("the search results are marked as GDPR")
-def step_impl(context):
-    """
-    :type context: behave.runner.Context
-    """
-    # TODO: We don't have any GDPR data just yet
     pass

@@ -19,8 +19,9 @@ Feature: Viewing datasets
     And they choose to see more like this
     Then they can see datasets that are similar to the dataset
 
-  Scenario: User can preview datasets
-    Given a dataset with CSV resource
-    When a user visits the page about the dataset
-    And they choose to preview the data
-    Then they can see a table view of the data
+# FIXME: Need to set resource `link_status` field to make this testable
+#  Scenario: User can preview datasets
+#    Given a dataset with CSV resource
+#    When a user visits the page about the dataset
+#    And they choose to preview the data
+#    Then they can see a table view of the data
