@@ -76,6 +76,8 @@ services:
     build:
       context: .
       dockerfile: compose/selenium/Dockerfile
+    environment:
+      - TRAVIS=1
     env_file:
       - .envs/test.env
     volumes:
