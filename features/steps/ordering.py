@@ -25,7 +25,6 @@ def step_impl(context):
     for dataset in context.driver.find_elements_by_class_name('dataset-heading'):
         datasets.append(dataset.find_elements_by_tag_name('a')[0].text.lower().split(' ')[0])
     sorted_datasets = sorted(datasets)
-    print(datasets, sorted_datasets)
     for i, ds in enumerate(datasets):
         assert ds == sorted_datasets[i], '{} != {}'.format(ds, sorted_datasets[i])
 
