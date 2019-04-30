@@ -56,7 +56,7 @@ def step_impl(context):
     input.send_keys(Keys.ENTER)
 
 
-@step('they search for "organization:ne AND title:agri"')
+@step('they search for "organization:defra AND title:ckan"')
 def step_impl(context):
     """
     :type context: behave.runner.Context
@@ -64,11 +64,11 @@ def step_impl(context):
     context.driver.get(context.base_url)
     input = context.driver.find_element_by_xpath('//*[@id="dataset-search-form"]/div[1]/input')
     input.clear()
-    input.send_keys('organization:david AND title:A Novel*')
+    input.send_keys('organization:defra AND title:ckan*')
     input.send_keys(Keys.ENTER)
 
 
-@step('the search results are published by "Natural England"')
+@step('the search results are published by Defra')
 def step_impl(context):
     """
     :type context: behave.runner.Context
@@ -77,16 +77,17 @@ def step_impl(context):
         x.text for x in context.driver.find_elements_by_class_name('dataset-publisher-heading')
     ))
     assert len(publishers) == 1
-    assert publishers[0] == 'Defra'
+    assert publishers[0] == 'Published by Department for Environment, Food & Rural Affairs', \
+        '{} != Published by Department for Environment, Food & Rural Affairs'.format(publishers[0])
 
 
-@step('the search results start with "agri"')
+@step('the search results start with "ckan"')
 def step_impl(context):
     """
     :type context: behave.runner.Context
     """
     for item in context.driver.find_elements_by_class_name('dataset-heading'):
-        assert 'agri' in item.find_elements_by_tag_name('a')[0].text.lower()
+        assert 'ckan' in item.find_elements_by_tag_name('a')[0].text.lower()
 
 
 @step("they enter a search location")

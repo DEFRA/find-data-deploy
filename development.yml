@@ -20,6 +20,7 @@ services:
     ports:
       - "0.0.0.0:80:5000"
     volumes:
+      - ./compose/ckan/entrypoints/ckan-entrypoint.sh:/ckan-entrypoint.sh
       - ./compose/ckan/config/development.ini:/etc/ckan/development.ini
       - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
       - ./ckan-extensions/ckanext-defrareports:/usr/lib/ckan/venv/src/ckanext-defrareports

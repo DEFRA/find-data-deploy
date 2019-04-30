@@ -8,10 +8,10 @@ def step_impl(context):
     """
     :type context: behave.runner.Context
     """
-    context.dataset_name = 'ckan-quality'
-    context.dataset_title = 'CKAN: Metadata quality'
+    context.dataset_name = 'dogs-per-square-kilometre'
+    context.dataset_title = 'Dogs per square kilometre'
     context.dataset_publisher = 'Department for Environment, Food & Rural Affairs'
-    context.dataset_license = 'UK Open Government Licence (OGL)'
+    context.dataset_license = 'Open Government Licence'
 
 
 @when("a user visits the page about the dataset")
@@ -61,10 +61,9 @@ def step_impl(context):
     """
     :type context: behave.runner.Context
     """
-    license = context.driver.find_element_by_xpath(
-        '//*[@id="content"]/div[3]/aside/div/div[2]/section/div/p/a[1]'
-    )
-    assert license.text == context.dataset_license
+    license = context.driver.find_element_by_class_name('license-text')
+    assert license.text == context.dataset_license,\
+        '"{}" != "{}"'.format(license.text, context.dataset_license)
 
 
 @given("a dataset that is geospatial")
@@ -72,7 +71,7 @@ def step_impl(context):
     """
     :type context: behave.runner.Context
     """
-    context.dataset_name = 'broads-authority-centre-line'
+    context.dataset_name = 'dogs-per-square-kilometre'
 
 
 @then("they see the dataset bounding box")
@@ -104,8 +103,8 @@ def step_impl(context):
     """
     :type context: behave.runner.Context
     """
-    context.dataset_id = '9dbed27f-fbca-4a17-98fa-f437bfba7e27'
-    context.dataset_name = 'ckan-quality'
+    context.dataset_id = 'e4d5c6a5-72f6-4baf-8fc1-e2a463dbe4f2'
+    context.dataset_name = 'cats-per-square-kilometre'
 
 
 @step("they choose to preview the data")
@@ -114,7 +113,7 @@ def step_impl(context):
     :type context: behave.runner.Context
     """
     context.driver.find_element_by_xpath(
-        '//*[@id="resource-b4f20e96-df25-41d9-acc0-2b46fb1b9bd1"]/div/div/ul/li[1]/a'
+        '//*[@id="resource-e4d5c6a5-72f6-4baf-8fc1-e2a463dbe4f2"]/div/div/ul/li[1]/a'
     ).click()
 
 

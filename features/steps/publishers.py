@@ -18,7 +18,7 @@ def step_impl(context):
     """
     input = context.driver.find_element_by_xpath('//*[@id="dataset-search-form"]/div/input')
     input.clear()
-    input.send_keys('Environment')
+    input.send_keys('defra')
     form = context.driver.find_element_by_id('dataset-search-form')
     form.find_element_by_tag_name('button').click()
     context.expected_search_results = 1
@@ -29,7 +29,9 @@ def step_impl(context):
     """
     :type context: behave.runner.Context
     """
-    assert len(context.driver.find_elements_by_class_name('org-item')) == context.expected_search_results
+    num_results = len(context.driver.find_elements_by_class_name('org-item'))
+    assert num_results == context.expected_search_results, \
+        '{} != {}'.format(num_results, context.expected_search_results)
 
 
 @step("they can see the publisher's name")
