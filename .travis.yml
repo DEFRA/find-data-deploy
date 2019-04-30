@@ -16,8 +16,8 @@ script:
   - docker-compose -f test.yml exec test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckan create-test-data || true
   - docker-compose -f test.yml exec test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckan create-test-data search || true
   - docker-compose -f test.yml exec test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckan create-test-data gov || true
-  - docker-compose -f test.yml exec test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckanext-defra create_test_data || true
   - docker-compose -f test.yml exec test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckanext-ga-report initdb -c /etc/ckan/test.ini
   - docker-compose -f test.yml exec test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckanext-defra import_publishers -c /etc/ckan/test.ini
+  - docker-compose -f test.yml exec test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckanext-defra create_test_data || true
   - docker-compose -f test.yml exec test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckanext-report report generate -c /etc/ckan/test.ini
   - docker-compose -f test.yml run --rm test_selenium /deploy/compose/selenium/run_tests.sh; echo $?
