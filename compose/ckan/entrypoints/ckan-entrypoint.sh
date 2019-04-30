@@ -100,7 +100,7 @@ if [ ! -f /tmp/.initialized ]; then
     ckan-paster --plugin=ckanext-ga-report initdb -c ${CKAN_INI}
 
     # Import publishers & their harvesters
-    echo "Syncing Publishers"
+    >&2 echo "Syncing Publishers"
     ckan-paster --plugin=ckanext-defra import_publishers -c ${CKAN_INI}
 
     touch /tmp/.initialized

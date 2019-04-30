@@ -9,6 +9,7 @@ env:
 install:
   - bash bin/travis-build.bash
 script:
+  - docker system prune --all --force
   - docker-compose -f test.yml up -d
   - docker-compose -f test.yml ps
   - docker-compose -f test.yml exec test_ckan /bin/bash -c "export PGPASSWORD=ckan; until psql -q -h test_db -U ckan_default -d ckan_test -c 'select * from user;'; do echo 'db unavailable. sleeping'; sleep 1; done"
