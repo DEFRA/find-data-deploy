@@ -16,7 +16,7 @@ def step_impl(context):
     """
     :type context: behave.runner.Context
     """
-    context.driver.get(context.base_url)
+    context.driver.get(context.base_url + '/dataset')
     input = context.driver.find_element_by_xpath('//*[@id="dataset-search-form"]/div[1]/input')
     input.clear()
     input.send_keys('A Novel By Tolstoy')
