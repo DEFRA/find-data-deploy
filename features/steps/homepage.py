@@ -13,12 +13,12 @@ def step_impl(context):
     context.driver.get(context.base_url)
 
 
-@then("they are on the Data page")
+@then("they are on the home page")
 def step_impl(context):
     """
     :type context: behave.runner.Context
     """
-    assert context.driver.current_url == context.base_url + '/dataset'
+    assert context.driver.current_url == context.base_url
 
 
 @when("a user visits the Data page")
