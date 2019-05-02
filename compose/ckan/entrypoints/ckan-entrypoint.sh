@@ -85,12 +85,6 @@ if [ ! -f /tmp/.initialized ]; then
     >&2 echo "Initialising Harvester"
     ckan-paster --plugin=ckanext-harvest harvester initdb -c ${CKAN_INI}
 
-    # Change postgis permissions (1/2)
-    psql -h ${DB_HOST} -d ${CKAN_DB_NAME} -U ${POSTGRES_USER} -c "ALTER VIEW geometry_columns OWNER TO ${POSTGRES_USER};"
-
-    # Change postgis permissions (2/2)
-    psql -h ${DB_HOST} -d ${CKAN_DB_NAME} -U ${POSTGRES_USER} -c "ALTER TABLE spatial_ref_sys OWNER TO ${POSTGRES_USER};"
-
     # Initialise the spatial database
     >&2 echo "Initialising spatial DB"
     ckan-paster --plugin=ckanext-spatial spatial initdb 4326 -c ${CKAN_INI}
