@@ -12,6 +12,8 @@ services:
     build:
       context: .
       dockerfile: compose/ckan/Dockerfile-test
+    environment:
+      - TRAVIS=1
     env_file:
       - .envs/test.env
     volumes:
@@ -21,13 +23,6 @@ services:
       - test_solr
       - test_redis
       - test_location
-    depends_on:
-      - test_db
-      - test_solr
-      - test_redis
-      - test_location
-    ports:
-      - "0.0.0.0:5000:5000"
     command:
       /usr/lib/ckan/venv/bin/paster serve /etc/ckan/test.ini --reload
 
@@ -44,8 +39,6 @@ services:
       - test_pg_data:/var/lib/postgresql/data
     expose:
       - "5432"
-    ports:
-      - "5433:5432"
 
   test_solr:
     container_name: mdf-test-solr
@@ -81,9 +74,8 @@ services:
     env_file:
       - .envs/test.env
     volumes:
-      - .:/deploy
       - test_ckan_storage:/var/lib/ckan
     links:
       - test_ckan
-      - test_location
       - test_db
+    command: make --directory /go/src/location-lookup run

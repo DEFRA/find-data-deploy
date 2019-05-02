@@ -13,6 +13,7 @@ script:
   - docker-compose -f test.yml up -d
   - docker-compose -f test.yml ps
   - docker-compose -f test.yml exec test_ckan /bin/bash -c "export PGPASSWORD=ckan; until psql -q -h test_db -U ckan_default -d ckan_test -c 'select * from user;'; do echo 'db unavailable. sleeping'; sleep 1; done"
+  - docker-compose -f test.yml exec test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckan db init -c /etc/ckan/test.ini
   - docker-compose -f test.yml exec test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckanext-report report initdb -c /etc/ckan/test.ini
   - docker-compose -f test.yml exec test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckan create-test-data || true
   - docker-compose -f test.yml exec test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckan create-test-data search || true
@@ -21,4 +22,4 @@ script:
   - docker-compose -f test.yml exec test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckanext-defra import_publishers -c /etc/ckan/test.ini
   - docker-compose -f test.yml exec test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckanext-defra create_test_data || true
   - docker-compose -f test.yml exec test_ckan /usr/lib/ckan/venv/bin/paster --plugin=ckanext-report report generate -c /etc/ckan/test.ini
-  - docker-compose -f test.yml run --rm test_selenium /deploy/compose/selenium/run_tests.sh; echo $?
+  - docker-compose -f test.yml run --rm test_selenium /deploy/compose/selenium/run_tests.sh
