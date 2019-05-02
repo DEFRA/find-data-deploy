@@ -18,7 +18,8 @@ def step_impl(context):
     """
     :type context: behave.runner.Context
     """
-    assert context.driver.current_url == context.base_url
+    assert context.driver.current_url == context.base_url + '/',\
+        '{} != {}'.format(context.driver.current_url, context.base_url + '/')
 
 
 @when("a user visits the Data page")
