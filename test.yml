@@ -12,6 +12,8 @@ services:
     build:
       context: .
       dockerfile: compose/ckan/Dockerfile-test
+    environment:
+      - TRAVIS=1
     env_file:
       - .envs/test.env
     volumes:
