@@ -45,6 +45,8 @@ ARG SENDGRID_PASSWORD
 RUN addgroup --gid 900 --system ckan
 RUN adduser --uid 900 --home $CKAN_HOME --system --gid 900 ckan
 
+RUN pip install --upgrade pip
+
 # Setup virtual environment for CKAN
 RUN mkdir -p $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH && \
     virtualenv $CKAN_VENV && \
