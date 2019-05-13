@@ -112,7 +112,7 @@ For quicker tests while developing you can drop into the ckan container and run 
 docker-compose -f test.yml run --rm test_ckan /bin/bash
 
 # Run defra tests
-/usr/lib/ckan/venv/bin/nosetests --nologcapture --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defrareports/test.ini /usr/lib/ckan/venv/src/ckanext-defra/ckanext/defra/tests/
+/usr/lib/ckan/venv/bin/nosetests --nologcapture --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defra/test.ini /usr/lib/ckan/venv/src/ckanext-defra/ckanext/defra/tests/
 
 # Run defrareports tests
 /usr/lib/ckan/venv/bin/nosetests --nologcapture --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defrareports/test.ini /usr/lib/ckan/venv/src/ckanext-defrareports/ckanext/defrareports/tests/
