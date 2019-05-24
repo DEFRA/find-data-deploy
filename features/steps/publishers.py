@@ -1,3 +1,4 @@
+import requests
 from behave import *
 
 use_step_matcher("re")
@@ -16,7 +17,7 @@ def step_impl(context):
     """
     :type context: behave.runner.Context
     """
-    input = context.driver.find_element_by_xpath('//*[@id="dataset-search-form"]/div/input')
+    input = context.driver.find_element_by_id('search-query')
     input.clear()
     input.send_keys('defra')
     form = context.driver.find_element_by_id('dataset-search-form')
@@ -72,7 +73,7 @@ def step_impl(context):
     """
     :type context: behave.runner.Context
     """
-    input = context.driver.find_element_by_xpath('//*[@id="dataset-search-form"]/div/input')
+    input = context.driver.find_element_by_id('search-query')
     input.clear()
     input.send_keys('defra')
     form = context.driver.find_element_by_id('dataset-search-form')
@@ -86,7 +87,9 @@ def step_impl(context):
     :type context: behave.runner.Context
     """
     context.driver.find_element_by_xpath('//a[@href="?startswith=d&"]').click()
-    context.expected_search_results = 1
+    resp = requests.get(context.base_url + '/api/3/action/organization_list')
+    orgs = resp.json()['result']
+    context.expected_search_results = len([x for x in orgs if x.lower().startswith('d')])
 
 
 @step("the publishers start with the letter")
@@ -113,5 +116,4 @@ def step_impl(context):
     """
     for item in context.driver.find_elements_by_class_name('dataset-publisher-heading'):
         assert item.find_element_by_tag_name('a').text == 'Department for Environment, Food & Rural Affairs'
-
 

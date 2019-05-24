@@ -1,5 +1,6 @@
 import time
 
+import requests
 from behave import *
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
@@ -17,7 +18,7 @@ def step_impl(context):
     :type context: behave.runner.Context
     """
     context.driver.get(context.base_url + '/dataset')
-    input = context.driver.find_element_by_xpath('//*[@id="dataset-search-form"]/div[1]/input')
+    input = context.driver.find_element_by_id('search-query')
     input.clear()
     input.send_keys('A Novel By Tolstoy')
     input.send_keys(Keys.ENTER)
@@ -50,21 +51,21 @@ def step_impl(context):
     :type context: behave.runner.Context
     """
     context.driver.get(context.base_url)
-    input = context.driver.find_element_by_xpath('//*[@id="dataset-search-form"]/div[1]/input')
+    input = context.driver.find_element_by_id('search-query')
     input.clear()
     input.send_keys('Foreign characters')
     input.send_keys(Keys.ENTER)
 
 
-@step('they search for "organization:defra AND title:ckan"')
+@step('they search for organization and title')
 def step_impl(context):
     """
     :type context: behave.runner.Context
     """
     context.driver.get(context.base_url)
-    input = context.driver.find_element_by_xpath('//*[@id="dataset-search-form"]/div[1]/input')
+    input = context.driver.find_element_by_id('search-query')
     input.clear()
-    input.send_keys('organization:defra AND title:ckan*')
+    input.send_keys('organization:defra AND title:{}*'.format(context.dataset_title))
     input.send_keys(Keys.ENTER)
 
 
@@ -81,13 +82,13 @@ def step_impl(context):
         '{} != Published by Department for Environment, Food & Rural Affairs'.format(publishers[0])
 
 
-@step('the search results start with "ckan"')
+@step('the search results match the title')
 def step_impl(context):
     """
     :type context: behave.runner.Context
     """
     for item in context.driver.find_elements_by_class_name('dataset-heading'):
-        assert 'ckan' in item.find_elements_by_tag_name('a')[0].text.lower()
+        assert context.dataset_title in item.find_elements_by_tag_name('a')[0].text.lower()
 
 
 @step("they enter a search location")
@@ -130,3 +131,33 @@ def step_impl(context):
     ac.move_to_element_with_offset(svg, 150, 150).click_and_hold().perform()
     ac.move_to_element_with_offset(svg, 450, 450).release().perform()
     context.driver.find_element_by_xpath('//*[@id="dataset-map-edit-buttons"]/a[2]').click()
+
+
+@step("they search for a dataset title")
+def step_impl(context):
+    """
+    :type context: behave.runner.Context
+    """
+    context.driver.get(context.base_url)
+    input = context.driver.find_element_by_id('search-query')
+    input.clear()
+    input.send_keys(context.dataset_title)
+    WebDriverWait(context.driver, 10).until(
+        EC.presence_of_element_located((By.CLASS_NAME, 'typeahead__item'))
+    )
+
+
+@then("they can click an autocomplete result")
+def step_impl(context):
+    """
+    :type context: behave.runner.Context
+    """
+    context.driver.find_elements_by_class_name('typeahead__item')[0].click()
+
+
+@step("are directed to the dataset page")
+def step_impl(context):
+    """
+    :type context: behave.runner.Context
+    """
+    assert len(context.driver.find_elements_by_class_name('dataset-tab-container')) == 1

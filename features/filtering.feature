@@ -18,11 +18,12 @@ Feature: Filtering
     Then they see a list of search results
     And the search results are licensed under that license
 
-  Scenario: User filters by private data
-    When a user visits the Data page
-    And they select to view private datasets
-    Then they see a list of search results
-    And the search results are marked as private
+# FIXME: There are no private datasets on the platform at the moment
+#  Scenario: User filters by private data
+#    When a user visits the Data page
+#    And they select to view private datasets
+#    Then they see a list of search results
+#    And the search results are marked as private
 
 # FIXME: There are no reference datasets on the platform at the moment
 #  Scenario: User filters by core reference data
