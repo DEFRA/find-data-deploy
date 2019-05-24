@@ -1,5 +1,6 @@
 import os
 
+import requests
 from selenium import webdriver
 
 from webdriver_manager.chrome import ChromeDriverManager
@@ -28,6 +29,16 @@ def before_feature(context, feature):
                 'take_snapshot': 'true'
             }
         )
+
+    # Add the first word from the title of an existing dataset to the context
+    resp = requests.get(
+        context.base_url + '/api/3/action/package_search?fq=organization:defra'
+    )
+    dataset = [
+        x['title'] for x in resp.json()['result']['results']
+        if x['title'].split() > 1
+    ][0]
+    context.dataset_title = dataset.lower().split()[0]
 
 
 def after_feature(context, feature):

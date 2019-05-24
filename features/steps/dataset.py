@@ -10,7 +10,7 @@ def step_impl(context):
     """
     context.dataset_name = 'dogs-per-square-kilometre'
     context.dataset_title = 'Dogs per square kilometre'
-    context.dataset_publisher = 'Department for Environment, Food & Rural Affairs'
+    context.dataset_publisher = 'Animal and Plant Health Agency'
     context.dataset_license = 'Open Government Licence'
 
 
