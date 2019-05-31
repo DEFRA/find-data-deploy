@@ -1,13 +1,21 @@
 ### Defra - Find Data Service
 
+**Status:** Development
+
 [![Build Status](https://travis-ci.org/DEFRA/find-data-deploy.svg?branch=master)](https://travis-ci.org/DEFRA/find-data-deploy)
 
 This repository contains the development and deployment config for Defra's Find Data Project.
 
-**Status:** Development
+The Find Data project is made up of two CKAN extensions, one golang service and the deploy repo which you are currently looking at.
 
-**CKAN Version**: 2.6+
-
+* [find-data-deploy](https://github.com/DEFRA/find-data-deploy)
+  * This repo. Contains docker config/build scripts/feature tests for the project.
+* [ckanext-defra](https://github.com/DEFRA/ckanext-defra)
+  * This is the main defra plugin. It holds the theme and any custom routes/logic for the project. 
+* [ckanext-defrareports](https://github.com/DEFRA/ckanext-defrareports)
+  * This repo contains custom reports built on top of the [ckanext-report](https://github.com/datagovuk/ckanext-report) and [ckanext-gareport](https://github.com/datagovuk/ckanext-ga-report) plugins.
+* [find-data-location-lookup](https://github.com/DEFRA/find-data-location-lookup)
+  * A prototype microservice to serve location data based on ordinance survey master map data.
 
 
 #### Get up and running locally
@@ -26,28 +34,103 @@ This repository contains the development and deployment config for Defra's Find 
     * Unzip the file `unzip opname_csv_gb.zip`
     * Merge all data into a single file for the go app `cat DATA/* | grep populatedPlace > merged_results.csv`
     
-3. Configure Google Analytics
-    * Generate the config by following the instructions on the [ckanext-ga-report github page](https://github.com/datagovuk/ckanext-ga-report#setup-google-analytics)
-    * Copy the file downloaded to compose/ckan/config/analytics-auth.json
-
-4. Get it running
+3. Get it running
     * Alias ckan to localhost
         * Add `127.0.1.1      ckan` to `/etc/hosts` 
-    * Bring the containers up `docker-compose -f development.yml up`
-    * Visit http://ckan:5000
-    * If ckan doesn't load after you first bring the containers up:
-        * This is most likely caused by a race condition between the ckan container and the db.
-        * Restarting the ckan container should sort it out `docker-compose -f development.yml up -d ckan`
+    * From the project root directory bring the containers up `docker-compose -f development.yml up`
+    * Visit http://ckan
+      * If ckan fails to start now please see the dev troubleshooting section
 
-5. User
+4. Admin User
     * Create a superuser account for yourself ``docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan sysadmin add <YOUR USERNAME> email=<YOUR EMAIL> name=<YOUR USERNAME> -c /etc/ckan/development.ini``
     
 
+### Dev Troubleshooting
+
+There is an intermittent issue when first building the project where the database gets into a partially setup state.
+
+If this is the case you may get errors like `...(psycopg2.ProgrammingError) column package.type does not exist` or `CKAN ERROR: column user.password does not exist at character...`
+
+You can remedy this by performing the following steps:
+ 
+  * Ensure all docker containers are stopped.
+  * Run ` docker-compose -f development.yml run --rm cron /rebuild-dev-db.sh`
+  * Bring the containers up again `docker-compose -f development.yml up`
+
+
+### Unit Tests
+
+Run tests for both the defra and defrareports plugin. This will spin up a new dev environment and run the tests.
+```.env
+docker-compose -f test.yml run --rm test_ckan /usr/lib/ckan/venv/bin/nosetests --nologcapture --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defrareports/test.ini /usr/lib/ckan/venv/src/ckanext-defrareports/ckanext/defrareports/tests/ /usr/lib/ckan/venv/src/ckanext-defra/ckanext/defra/tests/
+```
+
+For quicker tests while developing you can drop into the ckan container and run the tests directly.
+```.env
+
+# Connect to the ckan container
+docker-compose -f test.yml run --rm test_ckan /bin/bash
+
+# Run defra tests
+/usr/lib/ckan/venv/bin/nosetests --nologcapture --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defra/test.ini /usr/lib/ckan/venv/src/ckanext-defra/ckanext/defra/tests/
+
+# Run defrareports tests
+/usr/lib/ckan/venv/bin/nosetests --nologcapture --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defrareports/test.ini /usr/lib/ckan/venv/src/ckanext-defrareports/ckanext/defrareports/tests/
+```
+
+### Feature Testing
+We use behave and selenium for feature testing. Before getting started you will need to ensure you have an admin user
+
+```
+docker exec -it mdf-ckan ckan-paster --plugin=ckan sysadmin add admin --config=/etc/ckan/development.ini
+> Email address: admin@finddata
+> Password: correct horse battery staple
+```
+
+You will also need to install the test requirements
+```
+pip install -r requirements/test.txt
+```
+
+Now, from the project directory you can run the tests
+```
+behave
+```
+
 ### Deploying to Azure
 
-Until we have set up an Azure container registry we deploy by creating an ssh tunnel to our Azure container service and pointing docker to it.
+As the project is currently in alpha deployment is done ad-hoc by tunnelling to our Azure container service and pointing docker to it. We can then quickly push out updates from dev machines.
 
+**Azure Setup**
 Note: You will need to set up ssh keys and get them added to the container service on the Azure portal.
+
+
+**Configure Google Analytics**
+
+  * Generate the config by following the instructions on the [ckanext-ga-report github page](https://github.com/datagovuk/ckanext-ga-report#setup-google-analytics)
+  * Copy the file downloaded to compose/ckan/config/analytics-auth.json
+
+
+**CKAN CONFIG**
+
+You will also need to update the production ckan config in `compose/ckan/config/`. 
+
+Copy `production_example.ini` to `production.ini`.
+
+Then update the following settings with your own values:
+
+* `beaker.session.secret` - generate a new secret for this variable
+* `app_instance_uuid` - follow the steps generate a new uuid
+* `ckan.site_url` - Update to the domain of your azure service
+* `ckan.site_title`
+* `smtp.*`, `email_to` - these should match your mail server setup
+* `ckan.defra.location_service_url` - set this to `<your domain>/location-service`
+
+The following db settings have default values set but should be changed for security reasons when you go live:
+
+* `sqlalchemy.url`
+* `ckan.datastore.write_url`
+* `ckan.datastore.read_url`
 
 -----------
 
@@ -98,41 +181,3 @@ Renew certificates
 docker-compose run --rm letsencrypt letsencrypt renew
 ```
 
-### Unit Tests
-
-Run tests for both the defra and defrareports plugin. This will spin up a new dev environment and run the tests.
-```.env
-docker-compose -f test.yml run --rm test_ckan /usr/lib/ckan/venv/bin/nosetests --nologcapture --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defrareports/test.ini /usr/lib/ckan/venv/src/ckanext-defrareports/ckanext/defrareports/tests/ /usr/lib/ckan/venv/src/ckanext-defra/ckanext/defra/tests/
-```
-
-For quicker tests while developing you can drop into the ckan container and run the tests directly.
-```.env
-
-# Connect to the ckan container
-docker-compose -f test.yml run --rm test_ckan /bin/bash
-
-# Run defra tests
-/usr/lib/ckan/venv/bin/nosetests --nologcapture --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defra/test.ini /usr/lib/ckan/venv/src/ckanext-defra/ckanext/defra/tests/
-
-# Run defrareports tests
-/usr/lib/ckan/venv/bin/nosetests --nologcapture --ckan --with-pylons=/usr/lib/ckan/venv/src/ckanext-defrareports/test.ini /usr/lib/ckan/venv/src/ckanext-defrareports/ckanext/defrareports/tests/
-```
-
-### Feature Testing
-We use behave and selenium for feature testing. Before getting started you will need to ensure you have an admin user
-
-```
-docker exec -it mdf-ckan ckan-paster --plugin=ckan sysadmin add admin --config=/etc/ckan/development.ini
-> Email address: admin@finddata
-> Password: correct horse battery staple
-```
-
-You will also need to install the test requirements
-```
-pip install -r requirements/test.txt
-```
-
-Now, from the project directory you can run the tests
-```
-behave
-```

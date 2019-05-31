@@ -77,19 +77,18 @@ RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-harvest
 RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-googleanalytics/requirements.txt
 RUN /usr/lib/ckan/venv/bin/pip install --upgrade oauth2client
 
+# Need to be root to create the egg files
+USER root
+
 # Defra plugin
 COPY ./ckan-extensions/ckanext-defra /usr/lib/ckan/venv/src/ckanext-defra
+RUN /usr/lib/ckan/venv/bin/pip install -e /usr/lib/ckan/venv/src/ckanext-defra/
 RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-defra/dev-requirements.txt
 
 # Defrareports plugin
 COPY ./ckan-extensions/ckanext-defrareports /usr/lib/ckan/venv/src/ckanext-defrareports
+RUN /usr/lib/ckan/venv/bin/pip install -e /usr/lib/ckan/venv/src/ckanext-defrareports/
 RUN /usr/lib/ckan/venv/bin/pip install -r /usr/lib/ckan/venv/src/ckanext-defrareports/requirements.txt
-RUN /usr/lib/ckan/venv/bin/pip install -e /usr/lib/ckan/venv/src/ckanext-defrareports/
-
-# Need to be root to create the egg file
-USER root
-RUN /usr/lib/ckan/venv/bin/pip install -e /usr/lib/ckan/venv/src/ckanext-defra/
-RUN /usr/lib/ckan/venv/bin/pip install -e /usr/lib/ckan/venv/src/ckanext-defrareports/
 
 # Copy init file
 COPY ./compose/ckan/entrypoints/ckan-entrypoint.sh /
@@ -106,6 +105,10 @@ RUN mkdir /var/log/ckan/
 # Set up cron
 COPY ./compose/cron/config/cronjobs-staging /etc/cron.d/cronjobs
 RUN crontab /etc/cron.d/cronjobs
+
+# Copy db rebuild script
+COPY ./compose/ckan/bin/rebuild-dev-db.sh /
+RUN chmod a+x /rebuild-dev-db.sh
 
 ENTRYPOINT ["/ckan-entrypoint.sh"]
 
