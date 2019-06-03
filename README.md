@@ -33,11 +33,22 @@ The Find Data project is made up of two CKAN extensions, one golang service and 
     * cd to the data dir `cd compose/location/data/`
     * Unzip the file `unzip opname_csv_gb.zip`
     * Merge all data into a single file for the go app `cat DATA/* | grep populatedPlace > merged_results.csv`
-    
-3. Get it running
+    * cd back to the project root dir `cd ../../../`
+
+3. Setup your dev env
+
+    To allow for development on running containers you will need to create a virtual environment and install the extensions for development.
+    * From the project root run `virtualenv ~/.venv`
+    * `source ~/.venv/bin/activate`
+    * `pip install -e ckan-extensions/ckanext-defra`
+    * `pip install -e ckan-extensions/ckanext-defrareports`
     * Alias ckan to localhost
         * Add `127.0.1.1      ckan` to `/etc/hosts` 
-    * From the project root directory bring the containers up `docker-compose -f development.yml up`
+    
+4. Get it running
+    * From the project root, build the containers `docker-compose -f development.yml build`
+    * Then initialise the database `docker-compose -f development.yml run --rm cron /rebuild-dev-db.sh`
+    * Bring the containers up `docker-compose -f development.yml up`
     * Visit http://ckan
       * If ckan fails to start now please see the dev troubleshooting section
 
@@ -54,7 +65,7 @@ If this is the case you may get errors like `...(psycopg2.ProgrammingError) colu
 You can remedy this by performing the following steps:
  
   * Ensure all docker containers are stopped.
-  * Run ` docker-compose -f development.yml run --rm cron /rebuild-dev-db.sh`
+  * Run `docker-compose -f development.yml run --rm cron /rebuild-dev-db.sh`
   * Bring the containers up again `docker-compose -f development.yml up`
 
 
