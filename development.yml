@@ -86,6 +86,8 @@ services:
       - solr
       - redis
       - mailhog
+    depends_on:
+      - db
     volumes:
       - ./compose/ckan/config/development.ini:/etc/ckan/development.ini
       - ./ckan-extensions/ckanext-defra:/usr/lib/ckan/venv/src/ckanext-defra
