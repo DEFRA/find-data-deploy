@@ -1,6 +1,6 @@
 ### Defra - Find Data Service
 
-**Status:** Development
+**Status:** Development - The project was in alpha and is on hold from 11/06/19
 
 [![Build Status](https://travis-ci.org/DEFRA/find-data-deploy.svg?branch=master)](https://travis-ci.org/DEFRA/find-data-deploy)
 
@@ -9,13 +9,13 @@ This repository contains the development and deployment config for Defra's Find 
 The Find Data project is made up of two CKAN extensions, one golang service and the deploy repo which you are currently looking at.
 
 * [find-data-deploy](https://github.com/DEFRA/find-data-deploy)
-  * This repo. Contains docker config/build scripts/feature tests for the project.
+  * This repo contains docker config/build scripts/feature tests for the project.
 * [ckanext-defra](https://github.com/DEFRA/ckanext-defra)
   * This is the main defra plugin. It holds the theme and any custom routes/logic for the project. 
 * [ckanext-defrareports](https://github.com/DEFRA/ckanext-defrareports)
   * This repo contains custom reports built on top of the [ckanext-report](https://github.com/datagovuk/ckanext-report) and [ckanext-gareport](https://github.com/datagovuk/ckanext-ga-report) plugins.
 * [find-data-location-lookup](https://github.com/DEFRA/find-data-location-lookup)
-  * A prototype microservice to serve location data based on ordinance survey master map data.
+  * This is a prototype microservice to serve location data based on ordinance survey master map data.
 
 
 #### Get up and running locally
@@ -52,7 +52,7 @@ The Find Data project is made up of two CKAN extensions, one golang service and 
     * Visit http://ckan
       * If ckan fails to start now please see the dev troubleshooting section
 
-4. Admin User
+5. Admin User
     * Create a superuser account for yourself ``docker exec -it mdf-ckan /usr/local/bin/ckan-paster --plugin=ckan sysadmin add <YOUR USERNAME> email=<YOUR EMAIL> name=<YOUR USERNAME> -c /etc/ckan/development.ini``
     
 
@@ -110,7 +110,7 @@ behave
 
 ### Deploying to Azure
 
-As the project is currently in alpha deployment is done ad-hoc by tunnelling to our Azure container service and pointing docker to it. We can then quickly push out updates from dev machines.
+As the project was in alpha, deployment was done ad-hoc by tunnelling to our Azure container service and pointing docker to it. We can then quickly push out updates from dev machines.
 
 **Azure Setup**
 Note: You will need to set up ssh keys and get them added to the container service on the Azure portal.
@@ -154,19 +154,25 @@ The following db settings have default values set but should be changed for secu
     `export GOOGLE_ANALYTICS_USERNAME=???`
     
     `export GOOGLE_ANALYTICS_PASSWORD=???`
+    
 2. Log in to sentry and retrieve the dsn for your project
+
 3. Set the Sentry DSN environment variable 
     
     `export SENTRY_DSN=???`
+    
 4. Set the Sendgrid password environment variable
  
     `export SENDGRID_PASSWORD=???`
+    
 5. Create the tunnel 
     
     `ssh dockeruser@<YOUR AZURE LOAD BALANCER IP ADDRESS> -p 2200 -L 22375:127.0.0.1:2375`
+    
 6. Point docker to the remote service
  
     `export DOCKER_HOST=":22375"`
+    
 7. Bring the containers up 
     
     `docker-compose -f production.yml up -d`
