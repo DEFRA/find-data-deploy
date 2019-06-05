@@ -1,0 +1,4 @@
+FROM nginx:latest
+ADD ./compose/nginx/config/nginx_winddown.conf /etc/nginx/nginx.conf
+ADD ./compose/nginx/config/htpasswd /etc/nginx/htpasswd
+COPY ./compose/nginx/html /usr/share/nginx/html

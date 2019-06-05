@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  nginx:
+    container_name: mdf-prod-nginx
+    image: mdf-nginx
+    build:
+      context: .
+      dockerfile: ./compose/nginx/Dockerfile-winddown
+    env_file:
+      - .envs/prod.env
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    expose:
+      - "80"
+      - "443"
