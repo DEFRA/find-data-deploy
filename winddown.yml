@@ -1,5 +1,9 @@
 version: "3"
 
+volumes:
+  letsencrypt_certs:
+  letsencrypt_www:
+
 services:
   nginx:
     container_name: mdf-prod-nginx
@@ -10,9 +14,23 @@ services:
     env_file:
       - .envs/prod.env
     restart: always
+    volumes:
+      - letsencrypt_certs:/etc/letsencrypt
+      - letsencrypt_www:/var/www/letsencrypt
     ports:
       - "80:80"
       - "443:443"
     expose:
       - "80"
       - "443"
+  letsencrypt:
+    container_name: mdf-prod-letsencrypt
+    build:
+      context: .
+      dockerfile: compose/letsencrypt/Dockerfile
+    env_file:
+      - .envs/prod.env
+    volumes:
+      - letsencrypt_certs:/etc/letsencrypt
+      - letsencrypt_www:/var/www/letsencrypt
+    command: /bin/true
