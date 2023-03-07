@@ -12,7 +12,7 @@ geoalchemy2==0.5.0
 lxml==4.2.5
 shapely==1.6.4
 ckanapi==4.1
-OWSLib==0.17.0
+OWSLib==0.28.1
 ckanext-sentry==0.0.2
 ckanext-xloader==0.3.1
 requests[security]
